@@ -1,0 +1,74 @@
+Niels Graham, Will Ostlund, Arvind Mahankali
+
+Team GOM
+
+Description of Project
+The project’s core components will be very similar to Cloud 9 or Google Drive. It will be a text editing tool that allows 
+collaboration. We will begin by making it a client for easily accessible documents that others have edited - our implementation 
+of GitHub. We will be implementing the functionality of GitHub through networking. If possible, we will make it so that 
+multiple people can simultaneously work on the same files from different machines.
+
+User Interface:
+The program will be entirely run within the terminal and will use terminal commands to start and run the program. A user 
+will create a “home” directory, containing all of his work which could be shared using this program. The user will run our 
+executable and provide command line arguments within our terminal. Our executable will be in the “home” directory.
+
+The user can use specific commands to share his work with other users and change their permissions to read-only or 
+read + write for a file. This information will be stored in one large text file at our server.
+
+Any user attempting to edit a text file will have to open a connection with our server by logging in.
+
+The user enters commands within our built-in terminal, which allows the user to run his code without logging out and 
+exiting our program:
+
+$gitProject -s test.txt - The user sends current state of test.txt.
+$gitProject -r test.txt - The user receives current state of test.txt.
+$gitProject -e test.txt - opens test.txt in a text editor that the user selects from a menu if no one else is editing 
+test.txt. Once the text editor is closed, changes are automatically saved and sent to the server. When a user begins or 
+finishes editing a text file, updates are sent to the server to ensure others can/cannot edit this text file. For a file 
+which is not in the same folder as the executable, the user will provide the path.
+
+Technical Design:
+
+Features:
+Username and registration
+When users log in, they connect to a server
+Users may create new documents and add other users
+Users can either read & write or solely read a document
+IF WE DO NOT IMPLEMENT SIMULTANEOUS USERS: Users will not be able to edit a document at the same time
+Networking will be implemented to connect users
+A built in terminal for the user to run his code (allows the user to go back to the terminal without having to exit the program and log back in)
+
+Use of Topics Covered in Class:
+Networking: Connects users on different machines
+Semaphores: Prevents users from simultaneously editing files
+Memory Management: our program will be written in C
+Files, Directories: All user data is stored in a text file and folders in our server (see below for details)
+Processes: The built in terminal requires these
+
+Individual Tasks:
+Arvind: Built-in terminal and Networking
+Niels: Built-in terminal and Networking
+Will: Semaphores, Files and Directories at our server and Networking
+
+Additional Data Structures/Algorithms:
+We will use a text file to store user information, it will contain the following data:
+Username
+Name (or what the user prefers to be called)
+Password (this will be encrypted before it is added to the file with a simple hash function)
+DocsOwned (a list containing the names of documents that the users owns - includes path from owners home directory)
+docsWr (a list containing the names of documents the user has permission to write in)
+docsRd (a list containing the names of documents the user has permission to only read in)
+The lists in the file will be represented in our program as linked lists.
+For each user, there will be a folder containing all of the user’s text files and their path names relative to the user’s 
+home directory. This folder will be on the server.
+
+Anticipated Schedule: 
+By Tuesday, January 11th
+Each member will have finished his task and created code that compiles and works on its own
+NOTE: This does not include networking
+By the end of Friday, January 14th
+Group members will have finished networking and will have created a working model of the project
+By Monday, January 17th
+Members will have extensively tested the project for bugs and implemented necessary changes.
+If no bugs are found or every task has been accomplished, we may add more ambitious features to the project.
