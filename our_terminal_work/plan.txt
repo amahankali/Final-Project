@@ -7,7 +7,7 @@ the code for the terminal access the right location on our own computer.
 //////////////////////////////////"Pseudocode" for server://////////////////////////////////
 
 - First, open a connection with the server. Then, ask the user to log in. Check the user's info using our data files. (Treat the code for the data files as a black box)
-- Now, show the user a plain-text menu for the options, and ask the user to type a number to select the option (ex. 1 for user's own documents, 2 for collaborators' documents, etc) Now user goes into
+- Now, show the user a plain-text menu for the options, and ask the user to type a number to select the option (ex. 1 for user's own documents, 2 for all documents with access, etc) Now user goes into
 a hierarchy of directories that depends on the option picked.
 
 Case 1: User's own documents
@@ -17,14 +17,18 @@ rewritten to match the file on the user's computer.
 - The user is actually navigating through his own local copies. The only thing is that our terminal will frequently be updating the versions on the server to reflect the edits.
 - If a file belonging to a user is updated by a collaborator while the user is logged on, the updated version of the file (which is on the server) will overwrite the user's version of the file the next
 time the user accesses the file.
+- After choosing case 1, the user will have the option to create folders/files.
 
-Case 2: User goes to documents owned by collaborators
-
-
-
-
-
-
+Case 2: User searches for a specific document which the user has access to by giving its title
+- Go through files of user + collaborators to see if any files match this
+- Open the document in a text editor, then do all the steps in case 1.
 
 /////Commands we are creating in our shell/////
+
 - $gitProject invite <FILE/DIRECTORY> <USER> <PERMISSIONS>: allow USER to see FILE/DIRECTORY and all of its contents if he chooses the second option, and do other things depending on PERMISSIONS
+- $gitProject createFile <FILE>: creates file with name FILE in current directory
+- $gitProject createFolder <FOLDER>: creates folder with name FOLDER in current directory
+- $gitProject deleteFile <FILE>: delete file with name FILE in current directory if it exists
+- $gitProject deleteFolder <FOLDER>
+- $gitProject open <FILE>: opens FILE in user's choice of editor
+- $gitProject logout
