@@ -1,54 +1,53 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
-#include "networking.h"
-
-void process( char * s );
-void sub_server( int sd );
-
-int main() {
-
-  int sd, connection;
-
-  sd = server_setup();
-    
-  while (1) {
-
-    connection = server_connect( sd );
-
-    int f = fork();
-    if ( f == 0 ) {
-
-      close(sd);
-      sub_server( connection );
-
-      exit(0);
-    }
-    else {
-      close( connection );
-    }
+void error_check( int i, char *s ) {
+  if ( i < 0 ) {
+    printf("%d\n", i);
+    printf("[%s] error %d: %s\n", s, errno, strerror(errno) );
+    exit(1);
   }
-  return 0;
 }
 
+int server_setup(int argc, char *argv[]) {
 
-void sub_server( int sd ) {
+  int sd;
+  int i;
+  struct sockaddr_in serv_addr, cli_addr, sock;
 
-  char buffer[MESSAGE_BUFFER_SIZE];
-  while (read( sd, buffer, sizeof(buffer) )) {
+  sd = socket( AF_INET, SOCK_STREAM, 0 );
+  error_check( sd, "server socket" );
 
-    printf("[SERVER %d] received: %s\n", getpid(), buffer );
-    process( buffer );
-    write( sd, buffer, sizeof(buffer));    
-  }
-  
+  portno = atoi(argv[1]);
+  sock.sin_family = AF_INET;
+  sock.sin_addr.s_addr = INADDR_ANY;
+  sock.sin_port = htons(portno);
+  i = bind( sd, (struct sockaddr *)&sock, sizeof(sock) );
+  error_check( i, "server bind" );
+
+  return sd;
 }
-void process( char * s ) {
 
-  while ( *s ) {
-    *s = (*s - 'a' + 13) % 26 + 'a';
-    s++;
-  }
+int server_connect(int sd) {
+  int connection, i;
+
+  i = listen(sd, 5);
+  error_check( i, "server listen" );
+
+  struct sockaddr_in sock1, cli_addr;
+  unsigned int sock1_len = sizeof(sock1);
+  connection = accept( sd, (struct sockaddr *)&sock1, &sock1_len );
+  error_check( connection, "server accept" );
+
+  printf("[server] connected to %s\n", inet_ntoa( sock1.sin_addr ) );
+
+  return connection;
 }
