@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <stdio.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -18,13 +18,13 @@ void error_check( int i, char *s ) {
   }
 }
 
-int client_connect(char *IP, char* port) {
+int client_connect(char* ip, char* port) {
 
   int sd = socket(AF_INET, SOCK_STREAM, 0);
 
   struct sockaddr_in server;
   server.sin_family = AF_INET;
-  inet_aton(IP, server.sin_addr);
+  inet_aton(ip, &server.sin_addr);
   int portno = atoi(port);
   server.sin_port = htons(portno);
   
@@ -35,13 +35,13 @@ int client_connect(char *IP, char* port) {
 void copyfile(char* file, char* buffer)
 {
   int fd = open(file, O_RDONLY);
-  read(file, buffer, MAXFILESIZE);
+  read(fd, buffer, MAXFILESIZE);
   close(fd);
 }
 
 int main () {
 
-  int sd = client_connect(IP, PORT);
+  int sd = client_connect(TESTIP, TESTPORT);
 
   char* testBuf = (char *) calloc(1, MAXFILESIZE);
 

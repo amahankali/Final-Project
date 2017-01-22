@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include  <fcntl.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -18,7 +18,8 @@ void error_check( int i, char *s ) {
   }
 }
 
-int server_setup(int argc, char *argv[]) {
+//initializes the server
+int server_setup(char* port) {
 
   int sd;
   int i;
@@ -27,7 +28,7 @@ int server_setup(int argc, char *argv[]) {
   sd = socket( AF_INET, SOCK_STREAM, 0 );
   error_check( sd, "server socket" );
 
-  portno = atoi(argv[1]);
+  int portno = atoi(port);
   sock.sin_family = AF_INET;
   sock.sin_addr.s_addr = INADDR_ANY;
   sock.sin_port = htons(portno);
@@ -37,10 +38,12 @@ int server_setup(int argc, char *argv[]) {
   return sd;
 }
 
+//creates a new socket connecting the server to a client
+//we use this socket to send and receive file text from the server
+//to this particular client
 int server_connect(int sd) {
   int newsockfd, i;
   struct sockaddr_in sock1, cli_addr;
-  char buffer[256]
 
   i = listen(sd, 5);
   error_check( i, "server listen" );
@@ -50,6 +53,14 @@ int server_connect(int sd) {
   error_check( newsockfd, "server accept" );
 
   printf("[server] connected to %s\n", inet_ntoa( sock1.sin_addr ) );
+
+  return newsockfd;
+}
+
+/*
+void separateCode() {
+
+  char buffer[256];
 
   bzero(buffer,256);
   n = read(newsockfd,buffer,255);
@@ -62,11 +73,11 @@ int server_connect(int sd) {
     *fulltext = sendfile()
   }
 
-
-  return connection;
 }
 
-char sendfile(char name){
+//copies the text of a file named name
+//into a buffer
+char* fileText(char* name){
   FILE *fp;
   long lSize;
   char *buffer;
@@ -75,14 +86,49 @@ char sendfile(char name){
   lSize = ftell( fp );
   rewind( fp );
   buffer = calloc( 1, lSize+1 );
-  fread( buffer , lSize, 1 , fp) )
+  fread( buffer , lSize, 1 , fp)
   fclose(fp);
   return buffer;
 }
+*/
 
+void copyfile(char* file, char* buffer)
+{
+  int fd = open(file, O_RDONLY);
+  read(fd, buffer, MAXFILESIZE);
+  close(fd);
+}
+
+int main () {
+
+  int mainsd = server_setup(PORT);
+  int branch = server_connect(mainsd);
+
+
+  char* text = (char *) calloc(1, MAXFILESIZE);
+
+  //read
+  read(branch, text, MAXFILESIZE);
+  printf("[SERVER] received from client: \n");
+  printf("%s\n", text);
+
+
+  bzero(text, MAXFILESIZE);
+
+  //write
+  printf("[SERVER] writing to client\n");
+  copyfile("test.txt", text);
+  write(branch, text, MAXFILESIZE);
+
+
+  return 0;
+
+}
+
+/*
 int main() {
 
-  int mainSD = server_setup();
+  int mainSD = server_setup(PORT);
 
   while(1)
   {
@@ -105,3 +151,4 @@ int main() {
 
 
 }
+*/
