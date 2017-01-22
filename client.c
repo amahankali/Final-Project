@@ -32,7 +32,7 @@ int client_connect( char *host, int argc, char *argv[] ) {
   inet_aton( host, &(sock.sin_addr));
   portno = atoi(argv[2]);
 
-  server = gethostbyname(argv[1]);
+  server = argv[1];
    if (server == NULL) {
        return -1;
    }
@@ -62,4 +62,18 @@ int client_connect( char *host, int argc, char *argv[] ) {
     return -1;
   printf("%s\n",buffer);
   return sd;
+}
+
+char sendfile(char name){
+  FILE *fp;
+  long lSize;
+  char *buffer;
+  fp = fopen ( name , "rb" );
+  fseek( fp , 0L , SEEK_END);
+  lSize = ftell( fp );
+  rewind( fp );
+  buffer = calloc( 1, lSize+1 );
+  fread( buffer , lSize, 1 , fp) )
+  fclose(fp);
+  return buffer;
 }
