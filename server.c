@@ -57,7 +57,8 @@ int server_connect(int sd) {
   memcpy( subbuff, &buffer, 14 );
   subbuff[15] = '\0';
   if(strcmp(buffer, "$gitProject -e") == 0){
-
+    *char fulltext;
+    *fulltext = sendfile()
   }
 
 
@@ -65,25 +66,17 @@ int server_connect(int sd) {
 }
 
 char sendfile(char name){
-FILE *fp;
-long lSize;
-char *buffer;
-
-fp = fopen ( "blah.txt" , "rb" );
-if( !fp ) perror("blah.txt"),exit(1);
-
-fseek( fp , 0L , SEEK_END);
-lSize = ftell( fp );
-rewind( fp );
-
-/* allocate memory for entire content */
-buffer = calloc( 1, lSize+1 );
-if( !buffer ) fclose(fp),fputs("memory alloc fails",stderr),exit(1);
-
-/* copy the file into the buffer */
-if( 1!=fread( buffer , lSize, 1 , fp) )
-  fclose(fp),free(buffer),fputs("entire read fails",stderr),exit(1);
-
+  FILE *fp;
+  long lSize;
+  char *buffer;
+  fp = fopen ( name , "rb" );
+  fseek( fp , 0L , SEEK_END);
+  lSize = ftell( fp );
+  rewind( fp );
+  buffer = calloc( 1, lSize+1 );
+  fread( buffer , lSize, 1 , fp) )
+  fclose(fp);
+  return buffer;
 }
 
 int main() {
