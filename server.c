@@ -51,3 +51,29 @@ int server_connect(int sd) {
 
   return connection;
 }
+
+int main() {
+
+  int mainSD = server_setup();
+
+  while(1)
+  {
+    int branch = server_connect(mainSD);
+
+    int f = fork();
+    if(f)
+    {
+      close(branch);
+      continue;
+    }
+
+    //this is the main code - use functions from our other files
+    //there will be one server executable and one client executable
+
+    
+
+
+  }
+
+
+}

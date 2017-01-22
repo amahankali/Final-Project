@@ -61,7 +61,5 @@ int client_connect( char *host, int argc, char *argv[] ) {
   if (n < 0)
     return -1;
   printf("%s\n",buffer);
-  return 0;
-}
   return sd;
 }
