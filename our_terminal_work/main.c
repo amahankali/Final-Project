@@ -16,13 +16,13 @@ int noAdjSymbol(char* command);
 
 
 /*=========================================================
-main(): Starts by clearing the terminal and immediately 
-redirects to route. From there, it prints out the current 
-directory and asks for user input. It records this 
+main(): Starts by clearing the terminal and immediately
+redirects to route. From there, it prints out the current
+directory and asks for user input. It records this
 information using the fgets function then uses the strsep
 function to form an array of semicolon divided sections of
 the input. The program loops through the array executing
-passing in each part of the input to the run function 
+passing in each part of the input to the run function
 (located in pipe.h)
     -Parameters: none
     -Returns: an integer to terminate the function
@@ -30,9 +30,6 @@ passing in each part of the input to the run function
 
 int main () {
     system("clear");
-    printf("Shell—Version 1.0\n");
-    printf("An Arvind Mahankali-Brandon Huang-Will Ostlund Project\n");
-    printf("We hope you enjoy! :)\n");
     chdir(getenv("HOME"));
 	while(1) //inside of while loop reads one-line instruction, splits it by ';', and gives the pieces to singleCommand function
 	{
@@ -42,7 +39,7 @@ int main () {
         printf("%s: ", dir);
         char *a = (char *) calloc(1, 256);
         fgets(a, 255, stdin);
-        
+
         char* ans[MAXCOMMANDS];
         *(strchr(a, '\n')) = 0;
         int i = 0;
