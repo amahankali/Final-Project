@@ -151,7 +151,7 @@ int main() {
             char* file;
             char fileName[64];
             memcpy( fileName, &buffer[15], sizeof(buffer) );
-            //create touch fuction
+            touch(fileName);
           }
 
 
