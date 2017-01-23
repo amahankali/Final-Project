@@ -24,7 +24,7 @@ int checkUsername(char* x){
   return 1;
 }
 
-int reg(char* username, char* password) {
+int signUp(char* username, char* password) {
   umask(0000);
   char[] x = ":";
   char[] newLine = "\n";
