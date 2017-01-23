@@ -82,6 +82,22 @@ void touch (char* file_name){
   fclose(fp);
 }
 
+void textFile(char* buffer, char* fileName){
+  fileName = strsep(&buffer, '.');
+  strcat(fileName, ".txt");
+  touch(fileName);
+}
+
+int validateUser(char* fileName, char* userName){
+    char buffer[MAXFILESIZE], *name;
+    copyfile(fileName, buffer);
+    while( (name = strsep(buffer,"\n")) != NULL ){
+      if (name == userName)
+        return 1;
+    }
+    return -1;
+}
+
 //char* filecopy(char buffer){}
 
 
@@ -146,12 +162,13 @@ int main() {
           char* n = read(newsockfd,buffer,255);
           char subbuff[15];
           getCommand(n, subbuff);
-          if (strcmp(subbuff, "$gitProject -l") == 0) exit(0);
-          if (strcmp(subbuff, "$gitProject -c") == 0){
+          if (strcmp(subbuff, "$gitProject -l") == 0) exit(0);//logs out
+          if (strcmp(subbuff, "$gitProject -c") == 0){ //creates new file
             char* file;
             char fileName[64];
             memcpy( fileName, &buffer[15], sizeof(buffer) );
             touch(fileName);
+            textfile(fileName); //creates text file that we can insert permissions
           }
 
 
@@ -161,7 +178,7 @@ int main() {
             char* file;
             char fileName[64];
             memcpy( fileName, &buffer[15], sizeof(buffer) );
-            file = copyfile(file);
+            copyfile(fileName, file);
             write(newsockfd, file, strlen(file));
           }
           if (strcmp(getCommand(n), "$gitProject -r") == 0){//receives file from client and saves it on sever
