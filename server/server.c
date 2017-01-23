@@ -44,6 +44,7 @@ int server_setup(char* port) {
 int server_connect(int sd) {
   int newsockfd, i;
   struct sockaddr_in sock1, cli_addr;
+  char buffer[256];
 
   i = listen(sd, 5);
   error_check( i, "server listen" );
@@ -53,8 +54,24 @@ int server_connect(int sd) {
   error_check( newsockfd, "server accept" );
 
   printf("[server] connected to %s\n", inet_ntoa( sock1.sin_addr ) );
+  bzero(buffer,256);
+  n = read(newsockfd,buffer,255);
 
+  if (strcmp(getCommand(n), "$gitProject -e") == 0){
+    char* file;
+    char fileName[64];
+    strncpy ( fileName, buffer[15], sizeof(buffer) );
+    file = getfile(file);
+    write(sd, file, strlen(file));
+  }
   return newsockfd;
+}
+
+char* getCommand(char* buffer){
+  char subbuff[15];
+  memcpy( subbuff, &buffer, 14 );
+  subbuff[15] = '\0';
+  return subbuff;
 }
 
 void copyfile(char* file, char* buffer)
@@ -64,7 +81,7 @@ void copyfile(char* file, char* buffer)
   close(fd);
 }
 
-char sendfile(char name){
+char getfile(char name){
   FILE *fp;
   long lSize;
   char *buffer;
