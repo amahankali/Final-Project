@@ -57,41 +57,6 @@ int server_connect(int sd) {
   return newsockfd;
 }
 
-/*
-void separateCode() {
-
-  char buffer[256];
-
-  bzero(buffer,256);
-  n = read(newsockfd,buffer,255);
-
-  char subbuff[15];
-  memcpy( subbuff, &buffer, 14 );
-  subbuff[15] = '\0';
-  if(strcmp(buffer, "$gitProject -e") == 0){
-    *char fulltext;
-    *fulltext = sendfile()
-  }
-
-}
-
-//copies the text of a file named name
-//into a buffer
-char* fileText(char* name){
-  FILE *fp;
-  long lSize;
-  char *buffer;
-  fp = fopen ( name , "rb" );
-  fseek( fp , 0L , SEEK_END);
-  lSize = ftell( fp );
-  rewind( fp );
-  buffer = calloc( 1, lSize+1 );
-  fread( buffer , lSize, 1 , fp)
-  fclose(fp);
-  return buffer;
-}
-*/
-
 void copyfile(char* file, char* buffer)
 {
   int fd = open(file, O_RDONLY);
@@ -99,56 +64,37 @@ void copyfile(char* file, char* buffer)
   close(fd);
 }
 
-int main () {
-
-  int mainsd = server_setup(PORT);
-  int branch = server_connect(mainsd);
+char* 
 
 
-  char* text = (char *) calloc(1, MAXFILESIZE);
-
-  //read
-  read(branch, text, MAXFILESIZE);
-  printf("[SERVER] received from client: \n");
-  printf("%s\n", text);
-
-
-  bzero(text, MAXFILESIZE);
-
-  //write
-  printf("[SERVER] writing to client\n");
-  copyfile("test.txt", text);
-  write(branch, text, MAXFILESIZE);
-
-
-  return 0;
-
-}
-
-/*
 int main() {
 
   int mainSD = server_setup(PORT);
 
   while(1)
   {
-    int branch = server_connect(mainSD);
+      int branch = server_connect(mainSD);
 
-    int f = fork();
-    if(f)
-    {
-      close(branch);
-      continue;
-    }
+      int f = fork();
+      if(f)
+      {
+        close(branch);
+        continue;
+      }
 
-    //this is the main code - use functions from our other files
-    //there will be one server executable and one client executable
+      char* username = NULL;
+      int option = -1;
+      /*
+        Insert code here that gets the username and password
+        and verifies those against the data the server has,
+        or registers the user if needed.
+      */
 
 
 
 
   }
 
+  return 0;
 
 }
-*/
