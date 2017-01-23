@@ -26,6 +26,9 @@ int checkUsername(char* x){
   return 1;
 }
 
+//signs up username
+//returns 1 if works
+//returns 0 if not
 int signUp(char* username, char* password) {
   umask(0000);
   char x[] = ":";
@@ -42,6 +45,9 @@ int signUp(char* username, char* password) {
   return 0;
 }
 
+//checks if it is valid
+//returns 1 if valid login
+//returns 0 if not
 int login(char* username, char* password) {
   umask(0000);
   char *a = calloc(10000, 1);
@@ -62,4 +68,3 @@ int login(char* username, char* password) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-

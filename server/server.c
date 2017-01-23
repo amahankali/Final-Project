@@ -54,20 +54,7 @@ int server_connect(int sd) {
   error_check( newsockfd, "server accept" );
 
   printf("[server] connected to %s\n", inet_ntoa( sock1.sin_addr ) );
-  bzero(buffer,256);
-  n = read(newsockfd,buffer,255);
 
-  if (strcmp(getCommand(n), "$gitProject -e") == 0){
-    char* file;
-    char fileName[64];
-    strncpy ( fileName, buffer[15], sizeof(buffer) );
-    file = getfile(file);
-    write(sd, file, strlen(file));
-  }
-  if (strcmp(getCommand(n), "$gitProject -r") == 0){
-
-
-  }
   return newsockfd;
 }
 
@@ -134,6 +121,32 @@ int main() {
         close(branch);
         continue;
       }
+
+      //////////////////Logging in - registers user if needed//////////////////
+      char* type = (char *) calloc(1, 1);
+      read(newsockfd, type, 1);
+
+      char* username = (char *) calloc(1, MAXUSERNAME);
+      char* password = (char *) calloc(1, MAXUSERNAME);
+
+      read(newsockfd, username, MAXUSERNAME); //double check if it blocks with sockets
+      read(newsockfd, password, MAXUSERNAME);
+
+      int c;
+      if(type == 'r') c = signUp(username, password);
+      else c = login(username, password);
+      while(!c)
+      {
+        write(newsockfd, BAD, 1);
+        read(newsockfd, username, MAXUSERNAME); //double check if it blocks with sockets
+        read(newsockfd, password, MAXUSERNAME);
+      }
+      write(newsockfd, GOOD, 1);
+      /////////////////////////////////////////////////////////////////////////
+
+
+
+      /*
       char buffer[256];
       char* username = NULL;
       int option = -1;
@@ -164,7 +177,7 @@ int main() {
             writeFile(fileText, fileName);
           }
       }
-
+      */
 
 
 

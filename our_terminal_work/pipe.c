@@ -160,10 +160,13 @@ int run(char* a) {
       char subbuff[15];
       memcpy( subbuff, &buffer, 14 );
       subbuff[15] = '\0';
-      if(strcmp(buffer, "$gitProject -e") == 0){
-        clientEdit();
+      char fileName[64];
+      if(strcmp(subbuff, "$gitProject -e") == 0){
+        strncpy ( fileName, buffer[15], sizeof(buffer) )
+        clientEdit(fileName);
       }
       else if (strcmp(buffer, "$gitProject -s") == 0){
+        strncpy ( fileName, buffer[15], sizeof(buffer) )
         clientSend();
       }
       else

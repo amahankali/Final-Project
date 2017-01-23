@@ -27,7 +27,7 @@ int client_connect(char* ip, char* port) {
   inet_aton(ip, &server.sin_addr);
   int portno = atoi(port);
   server.sin_port = htons(portno);
-  
+
   connect(sd, (struct sockaddr *) &server, sizeof(server));
   return sd;
 }
@@ -39,6 +39,32 @@ void copyfile(char* file, char* buffer)
   close(fd);
 }
 
+char sendfile(char* name){
+  FILE *fp;
+  long lSize;
+  char *buffer;
+  fp = fopen ( name , "rb" );
+  fseek( fp , 0L , SEEK_END);
+  lSize = ftell( fp );
+  rewind( fp );
+  buffer = calloc( 1, lSize+1 );
+  fread( buffer , lSize, 1 , fp) )
+  fclose(fp);
+  return buffer;
+}
+
+int copy(char* buffer, char* filepath){
+  FILE *fp = fopen(filepath, "ab");
+  if (fp != NULL){
+    fputs(buffer, fp);
+    fclose(fp);
+  }
+}
+
+int clientEdit(int sockfd, char* fileName){
+  
+}
+
 int main () {
 
   int sd = client_connect(TESTIP, TESTPORT);
@@ -48,11 +74,10 @@ int main () {
     and sends it to the server for the server to verify.
   */
 
-    
-  
+
+
 
 
   return 0;
 
 }
-
