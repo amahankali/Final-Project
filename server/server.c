@@ -58,11 +58,9 @@ int server_connect(int sd) {
   return newsockfd;
 }
 
-char* getCommand(char* buffer){
-  char subbuff[15];
-  memcpy( subbuff, &buffer, 14 );
-  subbuff[15] = '\0';
-  return subbuff;
+void getCommand(char* request, char* command){
+  memcpy(command, request, 14);
+  command[15] = '\0';
 }
 
 void copyfile(char* file, char* buffer)
@@ -79,7 +77,10 @@ void writeFile(char* buffer, char* file)
   close(fd);
 }
 
-char getfile(char name){
+char* filecopy(char buffer){}
+
+
+/*char savefile(char name){
   FILE *fp;
   long lSize;
   char *buffer;
@@ -92,21 +93,7 @@ char getfile(char name){
   fclose(fp);
   return buffer;
 }
-
-char savefile(char name){
-  FILE *fp;
-  long lSize;
-  char *buffer;
-  fp = fopen ( name , "rb" );
-  fseek( fp , 0L, SEEK_END);
-  lSize = ftell( fp );
-  rewind( fp );
-  buffer = calloc( 1, lSize+1 );
-  fread( buffer , lSize, 1 , fp) )
-  fclose(fp);
-  return buffer;
-}
-
+*/
 
 int main() {
 
@@ -146,38 +133,42 @@ int main() {
 
 
 
-      /*
       char buffer[256];
-      char* username = NULL;
-      int option = -1;
       bzero(buffer,256);
-
 
       while(1)
       {
           char* n = read(newsockfd,buffer,255);
-          if(strcmp(getCommand(n), "$gitProject -L") == 0)
-          {
-            //Write code for logout
-            exit(0);
-          }
-          if (strcmp(getCommand(n), "$gitProject -e") == 0){//send requested file to client
+          char subbuff[15];
+          getCommand(n, subbuff);
+          if (strcmp(subbuff, "$gitProject -l") == 0) exit(0);
+          if (strcmp(subbuff, "$gitProject -c") == 0){
             char* file;
             char fileName[64];
-            filecopy ( fileName, buffer[15], sizeof(buffer) );
-            file = getfile(file);
+            memcpy( fileName, &buffer[15], sizeof(buffer) );
+            //create touch fuction
+          }
+
+
+
+
+          if (strcmp(subbuff, "$gitProject -e") == 0){//send file to client
+            char* file;
+            char fileName[64];
+            memcpy( fileName, &buffer[15], sizeof(buffer) );
+            file = copyfile(file);
             write(newsockfd, file, strlen(file));
           }
           if (strcmp(getCommand(n), "$gitProject -r") == 0){//receives file from client and saves it on sever
             char* fileText;
             char fileName[64];
-            filecopy ( fileName, buffer[15], sizeof(buffer) );
+            memcpy( fileName, &buffer[15], sizeof(buffer) );
             char file[MAXFILESIZE];
             read(newsockfd,fileText,sizeof(fileText));
             writeFile(fileText, fileName);
           }
       }
-      */
+
 
 
 
