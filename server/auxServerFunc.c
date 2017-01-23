@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <string.h>
 
+///////////////////////////LOGIN-RELATED FUNCTIONS///////////////////////////
+
 char* cypher(char* x){
   int i = 0;
   char[strlen(x)] ans;
@@ -24,7 +26,7 @@ int checkUsername(char* x){
   return 1;
 }
 
-int reg(char* username, char* password) {
+int signUp(char* username, char* password) {
   umask(0000);
   char[] x = ":";
   char[] newLine = "\n";
@@ -58,3 +60,6 @@ int login(char* username, char* password) {
   }
   return 0;
 }
+
+/////////////////////////////////////////////////////////////////////////////
+

@@ -5,7 +5,7 @@
 int signUp(char* user, char* password);
 
 //given an entered username and password, see if this is a valid combination
-int loginTest(char* user, char* password);
+int login(char* user, char* password);
 
 //share a file
 int share(char* filename, char* owner, char* collab, int permissions); //collab is the collaborator
