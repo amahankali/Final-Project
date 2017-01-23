@@ -10,7 +10,7 @@
 #define MAXCOMMANDS 50
 
 /*=======================================================
-void print(char* a[], int length): prints out the contents 
+void print(char* a[], int length): prints out the contents
 of a given array
     - Parameters:
         - a is the array
@@ -77,14 +77,14 @@ int run(char* a) {
         i++;
     }
     i = 0;
-    while(n){ 
+    while(n){
       char *s;
       s = strsep(&n, " ");
       ans[i] = s;
       //printf("%s %s\n", s, ans[i]);
       i++;
     }
-  
+
     ans[i] = 0;
 
     if(strcmp(ans[0], "cd") == 0)
@@ -157,8 +157,15 @@ int run(char* a) {
         }
       }
       buffer[bufferLen] = 0;
-
-      int ret = execvp(buffer[0], buffer);
+      char subbuff[15];
+      memcpy( subbuff, &buffer, 14 );
+      subbuff[15] = '\0';
+      if(strcmp(buffer, "$gitProject -e") == 0){
+        clientEdit();
+      }
+      
+      else
+        int ret = execvp(buffer[0], buffer);
       if(ret)
       {
         fprintf(stderr, "-bash: %s: command not found\n", buffer[0]);
@@ -181,7 +188,7 @@ int run(char* a) {
 
 /*=======================================================
 int piper(char *a): Parses the given string by the '|'
-character and proceeds to check for notable exceptions. 
+character and proceeds to check for notable exceptions.
 If there are none then the program forks, redirects in the
 child process and reverts back in the parent process.
     - Parameters:
@@ -192,7 +199,7 @@ child process and reverts back in the parent process.
 int piper(char *a){
     //deal with case of | at ending
     //testing
-    
+
     if(a[strlen(a) - 1] == '|') //checks if last character is '|'
     {
       //read the last command from stdin
@@ -222,11 +229,11 @@ int piper(char *a){
     int status;
     int f = fork();
     if (f == 0){
-        dup2(arr[1], STDOUT_FILENO); 
+        dup2(arr[1], STDOUT_FILENO);
         run(second);
         //fprintf(stderr, "%s\n", second);
         exit(0);
-    } 
+    }
     else{
         wait(&status);
         if(WIFSIGNALED(status)) return 1;
