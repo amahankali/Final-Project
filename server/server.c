@@ -64,7 +64,20 @@ void copyfile(char* file, char* buffer)
   close(fd);
 }
 
-char* 
+char sendfile(char name){
+  FILE *fp;
+  long lSize;
+  char *buffer;
+  fp = fopen ( name , "rb" );
+  fseek( fp , 0L , SEEK_END);
+  lSize = ftell( fp );
+  rewind( fp );
+  buffer = calloc( 1, lSize+1 );
+  fread( buffer , lSize, 1 , fp) )
+  fclose(fp);
+  return buffer;
+}
+
 
 
 int main() {
