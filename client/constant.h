@@ -1,3 +1,0 @@
-#define TESTIP "127.0.0.1"
-#define TESTPORT "12425"
-#define MAXFILESIZE 5000
