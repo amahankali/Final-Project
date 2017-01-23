@@ -9,7 +9,7 @@
 
 char* cypher(char* x){
   int i = 0;
-  char[strlen(x)] ans;
+  char *ans = calloc(strlen(x),1);
   while(*(x+i)){
     ans[i] = (*(x+i) * 3) % 128;
   }
@@ -28,8 +28,8 @@ int checkUsername(char* x){
 
 int signUp(char* username, char* password) {
   umask(0000);
-  char[] x = ":";
-  char[] newLine = "\n";
+  char x[] = ":";
+  char newLine[] = "\n";
   int f = open("users.txt", O_APPEND | O_RDWR, 0666);
   printf("\nRegistering User...\n\n");
   if(checkUsername(username) && checkUsername(password)){
@@ -50,8 +50,8 @@ int login(char* username, char* password) {
   if(checkUsername(username) && checkUsername(password)){
     read(f, a, sizeof(a));
     while(*a){
-      char* k = strsep(a, '\n')
-      if(strcmp(strsep(k, ':'), username) == 0){
+      char* k = strsep(&a, "\n");
+      if(strcmp(strsep(&k, ":"), username) == 0){
 	if(strcmp(k, cypher(password)) == 0){
 	  return 1;
 	}
