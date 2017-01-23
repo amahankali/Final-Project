@@ -163,7 +163,9 @@ int run(char* a) {
       if(strcmp(buffer, "$gitProject -e") == 0){
         clientEdit();
       }
-      
+      else if (strcmp(buffer, "$gitProject -s") == 0){
+        clientSend();
+      }
       else
         int ret = execvp(buffer[0], buffer);
       if(ret)
