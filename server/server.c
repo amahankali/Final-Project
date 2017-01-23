@@ -77,7 +77,12 @@ void writeFile(char* buffer, char* file)
   close(fd);
 }
 
-char* filecopy(char buffer){}
+void touch (char* file_name){
+  FILE* fp = fopen( file_name, "w+" );
+  fclose(fp);
+}
+
+//char* filecopy(char buffer){}
 
 
 /*char savefile(char name){
