@@ -64,6 +64,10 @@ int server_connect(int sd) {
     file = getfile(file);
     write(sd, file, strlen(file));
   }
+  if (strcmp(getCommand(n), "$gitProject -r") == 0){
+
+
+  }
   return newsockfd;
 }
 
@@ -81,12 +85,33 @@ void copyfile(char* file, char* buffer)
   close(fd);
 }
 
+void writeFile(char* buffer, char* file)
+{
+  int fd = open(file, O_TRUNC | O_WRONLY | O_CREAT); //double check
+  write(fd, buffer, strlen(buffer));
+  close(fd);
+}
+
 char getfile(char name){
   FILE *fp;
   long lSize;
   char *buffer;
   fp = fopen ( name , "rb" );
-  fseek( fp , 0L , SEEK_END);
+  fseek( fp , 0L, SEEK_END);
+  lSize = ftell( fp );
+  rewind( fp );
+  buffer = calloc( 1, lSize+1 );
+  fread( buffer , lSize, 1 , fp) )
+  fclose(fp);
+  return buffer;
+}
+
+char savefile(char name){
+  FILE *fp;
+  long lSize;
+  char *buffer;
+  fp = fopen ( name , "rb" );
+  fseek( fp , 0L, SEEK_END);
   lSize = ftell( fp );
   rewind( fp );
   buffer = calloc( 1, lSize+1 );
@@ -96,14 +121,12 @@ char getfile(char name){
 }
 
 
-
 int main() {
 
   int mainSD = server_setup(PORT);
-
   while(1)
   {
-      int branch = server_connect(mainSD);
+      int newsockfd = server_connect(mainSD);
 
       int f = fork();
       if(f)
@@ -111,14 +134,36 @@ int main() {
         close(branch);
         continue;
       }
-
+      char buffer[256];
       char* username = NULL;
       int option = -1;
-      /*
-        Insert code here that gets the username and password
-        and verifies those against the data the server has,
-        or registers the user if needed.
-      */
+      bzero(buffer,256);
+
+
+      while(1)
+      {
+          char* n = read(newsockfd,buffer,255);
+          if(strcmp(getCommand(n), "$gitProject -L") == 0)
+          {
+            //Write code for logout
+            exit(0);
+          }
+          if (strcmp(getCommand(n), "$gitProject -e") == 0){//send requested file to client
+            char* file;
+            char fileName[64];
+            filecopy ( fileName, buffer[15], sizeof(buffer) );
+            file = getfile(file);
+            write(newsockfd, file, strlen(file));
+          }
+          if (strcmp(getCommand(n), "$gitProject -r") == 0){//receives file from client and saves it on sever
+            char* fileText;
+            char fileName[64];
+            filecopy ( fileName, buffer[15], sizeof(buffer) );
+            char file[MAXFILESIZE];
+            read(newsockfd,fileText,sizeof(fileText));
+            writeFile(fileText, fileName);
+          }
+      }
 
 
 
