@@ -91,23 +91,23 @@ void writeFile(char* buffer, char* file)
 //ending in .jfk - this new file will contain the list of users
 //allowed to see the file
 //assumes filename ends in '.txt'
-char* permFile(char* filename){
+char* permfile(char* filename){
   char* ans = calloc(1, MAXMESSAGE + 20);
   strcpy(filename, ans);
-  ans = strsep(&ans, ".");
+  ans = strsep(&ans, '.');
   strcat(ans, ".jfk");
   touch(ans);
   return ans;
 }
 
 //check if user can edit file
-int validateUser(char* filename, char* username){
+int validateUser(char* filename, char* filename){
     char buffer[MAXFILESIZE];
-    char* permfile = permFile(filename);
+    char* permfile = permfile(filename);
     copyfile(permfile, buffer);
     char* name;
-    while((name = strsep(&buffer,"\n")) != NULL){
-      if (strcmp(name, username) == 0) return 1;
+    while((name = strsep(buffer,"\n")) != NULL){
+      if (strcmp(name, filename) == 0) return 1;
     }
     return 0;
 }
@@ -141,7 +141,7 @@ int main() {
       int serverF = fork();
       if(serverF)
       {
-        close(newsockfd);
+        close(branch);
         continue;
       }
 
@@ -164,7 +164,7 @@ int main() {
         write(newsockfd, BAD, 1);
         read(newsockfd, username, MAXMESSAGE); //double check if it blocks with sockets
         read(newsockfd, password, MAXMESSAGE);
-        if(*type == 'r') c = signUp(username, password);
+        if(type == 'r') c = signUp(username, password);
         else c = login(username, password);
       }
       write(newsockfd, GOOD, 1);
@@ -196,7 +196,7 @@ int main() {
             }
 
             //setup bookkeeping: permission file, semaphore
-            char* permfile = permFile(filename);
+            char* permfile = permfile(filename);
             int permFD = open(permfile, O_WRONLY);
             write(permFD, username, strlen(username));
             write(permFD, "\n", 5);
@@ -209,7 +209,7 @@ int main() {
             struct sembuf op;
             op.sem_num = 0;
             op.sem_op = 1;
-            semop(semd, &op, 1);
+            semop(semd, op, 1);
 
             write(newsockfd, GOOD, 1);
           }
@@ -220,10 +220,10 @@ int main() {
             char* filename = request + COMMANDSIZE + 1;
 
             //check if he is allowed
-            validateUser(filename, username);
+            validate(filename, username);
 
             //check semaphore
-            int key = ftok(filename, 12);
+            int key = ftok(filename, 120;
             int semd = semget(key, 1, 0644);
             int val = semctl(semd, 0, GETVAL);
             if(!val)
@@ -233,10 +233,12 @@ int main() {
             }
 
             //update semaphore - down
+            int key = ftok(filename, 12);
+            int semd = semget(key, 1, 0644);
             struct sembuf op;
             op.sem_num = 0;
             op.sem_op = -1;
-            semop(semd, &op, 1);
+            semop(semd, op, 1);
 
             //send contents of file to client
             char* filebuf = (char *) calloc(1, MAXFILESIZE + 1);
@@ -265,7 +267,7 @@ int main() {
             struct sembuf op;
             op.sem_num = 0;
             op.sem_op = 1;
-            semop(semd, &op, 1);
+            semop(semd, op, 1);
           }
           else if(strcmp(commandType, "$gitProject -rmf") == 0)
           {
@@ -279,7 +281,7 @@ int main() {
             }
 
             //check semaphore
-            int key = ftok(filename, 12);
+            int key = ftok(filename, 120;
             int semd = semget(key, 1, 0644);
             int val = semctl(semd, 0, GETVAL);
             if(!val)
@@ -289,10 +291,11 @@ int main() {
             }
 
             //remove semaphore
+            int key = ftok(filename, 12);
+            int semd = semget(key, 1, 0644);
             semctl(semd, 0, IPC_RMID);
 
             //remove perm file
-            char* permfile = permFile(filename);
             remove(permfile);
 
             //remove file
@@ -303,44 +306,22 @@ int main() {
           {
             //the client is asking to share a file with
             //another user
-
             char* filename = request + COMMANDSIZE + 1;
-            int err = open(filename, O_CREAT | O_EXCL); //if file does not exist, it cannot be shared
+            int err = open(filename, O_CREAT | O_EXCL);
             if(!err)
             {
               write(newsockfd, BAD, 1);
               continue;
             }
 
-            ///////////////////////////////////////////////////////////////////////
-            //check if the user is an owner of the file (you have to be owner to invite) -
-            //in the permFile, the owner will always be first line
-            char* permfile = permFile(filename);
-            //get first line of permfile. this should be the user
-            char* owner = calloc(1, MAXFILESIZE + 1);
-            int permFD = open(permfile, O_RDONLY);
-            read(permFD, owner, MAXFILESIZE);
-            close(permFD);
-
-            owner = strsep(&owner, "\n");
-            if(strcmp(username, owner)) //user is not the onwer
-            {
-              write(newsockfd, BAD, 1);
-              free(owner);
-              continue;
-            }
-            free(owner);
-            ///////////////////////////////////////////////////////////////////////
-
-
             //add the other user to the permfile of this file
+            char* permfile = permfile(filename);
             char* otheruser = filename + strlen(filename) + 1;
-            permFD = open(permfile, O_APPEND);
+            int permFD = open(permfile, O_APPEND);
             write(permFD, otheruser, MAXMESSAGE);
             close(permFD);
 
           }
-          else write(newsockfd, BAD, 1);
 
           /*
           if (strcmp(subbuff, "$gitProject -c") == 0){ //creates new file
