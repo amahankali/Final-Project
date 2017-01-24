@@ -312,15 +312,30 @@ int main() {
               continue;
             }
 
-            //check if the user is an owner of the file -
-            //in the permFile, the user has to be first line
+            ///////////////////////////////////////////////////////////////////////
+            //check if the user is an owner of the file (you have to be owner to invite) -
+            //in the permFile, the owner will always be first line
             char* permfile = permFile(filename);
+            //get first line of permfile. this should be the user
+            char* owner = calloc(1, MAXFILESIZE + 1);
+            int permFD = open(permfile, O_RDONLY);
+            read(permFD, owner, MAXFILESIZE);
+            close(permFD);
 
+            owner = strsep(&owner, "\n");
+            if(strcmp(username, owner)) //user is not the onwer
+            {
+              write(newsockfd, BAD, 1);
+              free(owner);
+              continue;
+            }
+            free(owner);
+            ///////////////////////////////////////////////////////////////////////
 
 
             //add the other user to the permfile of this file
             char* otheruser = filename + strlen(filename) + 1;
-            int permFD = open(permfile, O_APPEND);
+            permFD = open(permfile, O_APPEND);
             write(permFD, otheruser, MAXMESSAGE);
             close(permFD);
 
