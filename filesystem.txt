@@ -4,13 +4,8 @@ ______ User list - passwords
 
 
 ______ User 1
-____________ List of files user has shared, along with sharing permissions
 ____________ List of files shared with user, along with permissions
 ____________ All of the user’s files (each file will have associated user list)
-
-
-
 ______ User 2
 ….
-
 ______ User N
