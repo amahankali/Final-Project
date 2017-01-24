@@ -5,10 +5,13 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include "constant.h"
+#include "auxServerFunc.h"
 
 void error_check( int i, char *s ) {
   if ( i < 0 ) {
@@ -77,14 +80,9 @@ void writeFile(char* buffer, char* file)
   close(fd);
 }
 
-void touch (char* file_name){
-  FILE* fp = fopen( file_name, "w+" );
-  fclose(fp);
-}
-
-void textFile(char* buffer, char* fileName){
+void textFile(char* buffer){
   fileName = strsep(&buffer, '.');
-  strcat(fileName, ".txt");
+  strcat(fileName, ".jfk");
   touch(fileName);
 }
 
@@ -127,8 +125,8 @@ int main() {
   {
       int newsockfd = server_connect(mainSD);
 
-      int f = fork();
-      if(f)
+      int serverF = fork();
+      if(serverF)
       {
         close(branch);
         continue;
@@ -163,10 +161,94 @@ int main() {
 
       while(1)
       {
+<<<<<<< HEAD
           char* n = read(newsockfd,buffer,255);
           char subbuff[15];
           getCommand(n, subbuff);
           if (strcmp(subbuff, "$gitProject -l") == 0) exit(0);//logs out
+=======
+          read(newsockfd, request, MAXMESSAGE);
+          getCommand(request, commandType);
+
+          /*
+          Types of commands and their symbols
+          1. $gitProject invite <FILE/DIRECTORY> <USER> <PERMISSIONS>: allow USER to see FILE/DIRECTORY and all of its contents
+          if he chooses the second option, and do other things depending on PERMISSIONS
+          2. $gitProject createFile <FILE>: creates file with name FILE in current directory
+          3. $gitProject createFolder <FOLDER>: creates folder with name FOLDER in current directory
+          4. $gitProject deleteFile <FILE>: delete file with name FILE in current directory if it exists
+          5. $gitProject deleteFolder <FOLDER>
+          6. $gitProject open <FILE>: opens FILE in user's choice of editor
+          7. $gitProject logout
+
+          8. We are planning to implement gcc and execute - only c code can be run using our thing
+          */
+
+          if(strcmp(commandType, "$gitProject -lgo") == 0) exit(0); //logging out
+          if(strcmp(commandType, "$gitProject -crf") == 0)
+          {
+            //the client is asking to create a file
+            char* fileName = request + COMMANDSIZE; //relative path from root of server file system to requested file
+            int c = touch(fileName);
+
+            if(!c)
+            {
+              write(newsockfd, BAD, 1);
+              continue; //prompt for another command on client-side
+            }
+
+            //setup bookkeeping: permission file, semaphore
+            textfile(fileName);
+
+            //semaphore
+            int key = ftok(fileName, 12);
+            int semd = semget(key, 1, IPC_CREAT | 0644);
+            struct sembuf op;
+            op.sem_num = 0;
+            op.sem_op = 1;
+            semop(semd, op, 1);
+
+            write(newsockfd, GOOD, 1);
+          }
+          if(strcmp(commandType, "$gitProject -crd") == 0)
+          {
+            //the client is asking to create a directory
+          }
+          if(strcmp(commandType, "$gitProject -edt") == 0)
+          {
+            //client is asking to open a file
+            //server should send updated version
+          }
+          if(strcmp(commandType, "$gitProject -rec") == 0)
+          {
+            //this is not really a command, but this is the message
+            //the client will send once the user is done editing a file
+          }
+          if(strcmp(commandType, "$gitProject -rmf") == 0)
+          {
+            //the client is asking to remove a file
+          }
+          if(strcmp(commandType, "$gitProject -rmd") == 0)
+          {
+            //the client is asking to remove a directory
+          }
+          if(strcmp(commandType, "$gitProject -inv") == 0)
+          {
+            //the client is asking to share a file with
+            //another user
+          }
+          if(strcmp(commandType, "$gitProject -gcc") == 0)
+          {
+            //the client is asking to compile a file
+          }
+          if(strcmp(commandType, "$gitProject -exe") == 0)
+          {
+            //the client is asking to execute a file
+          }
+
+
+          /*
+>>>>>>> e309d0b3a3a53a309ff951d7acbbd712b4cef341
           if (strcmp(subbuff, "$gitProject -c") == 0){ //creates new file
             char* file;
             char fileName[64];

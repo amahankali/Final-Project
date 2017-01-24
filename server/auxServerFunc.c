@@ -68,3 +68,22 @@ int login(char* username, char* password) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////COMMAND-RELATED FUNCTIONS///////////////////////////
+int touch(char* filename)
+{
+  //CHECK IF FILE ALREADY EXISTS
+  int f = fork();
+  if(f == 0) execlp("touch", fileName);
+  return 1;
+}
+
+/*
+//go over touch function
+void touch (char* file_name){
+  FILE* fp = fopen( file_name, "w+" );
+  fclose(fp);
+}
+*/
+
+///////////////////////////////////////////////////////////////////////////////
