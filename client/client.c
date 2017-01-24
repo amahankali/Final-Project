@@ -40,7 +40,8 @@ void copyfile(char* file, char* buffer)
   read(fd, buffer, MAXFILESIZE);
   close(fd);
 }
-/*
+
+
 char sendfile(char* name){
   FILE *fp;
   long lSize;
@@ -66,36 +67,12 @@ int copy(char* buffer, char* filepath){
 int clientEdit(int sockfd, char* fileName){
 
 }
-*/
 
 int main () {
 
   int sd = client_connect(TESTIP, TESTPORT);
 
-  char* testBuf = (char *) calloc(1, MAXFILESIZE);
 
-  copyfile("test.txt", testBuf);
-  write(sd, testBuf, MAXFILESIZE);
-  printf("[CLIENT] test.txt sent\n");
-
-  printf("[CLIENT] about to read\n");
-
-  bzero(testBuf, strlen(testBuf));
-  read(sd, testBuf, MAXFILESIZE);
-  printf("[CLIENT] read:\n");
-  printf("%s\n", testBuf);
-  return 0;
-
-}
-
-/*
-int main () {
-
-  int sd = client_connect(TESTIP, TESTPORT);
-
-  /*
-    Insert code here that gets the username and password
-    and sends it to the server for the server to verify.
 
 
 
@@ -105,4 +82,3 @@ int main () {
   return 0;
 
 }
-*/
