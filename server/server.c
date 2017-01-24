@@ -94,20 +94,20 @@ void writeFile(char* buffer, char* file)
 char* permfile(char* filename){
   char* ans = calloc(1, MAXMESSAGE + 20);
   strcpy(filename, ans);
-  ans = strsep(&ans, '.');
+  ans = strsep(&ans, ".");
   strcat(ans, ".jfk");
   touch(ans);
   return ans;
 }
 
 //check if user can edit file
-int validateUser(char* filename, char* filename){
+int validateUser(char* filename, char* username){
     char buffer[MAXFILESIZE];
     char* permfile = permfile(filename);
     copyfile(permfile, buffer);
     char* name;
-    while((name = strsep(buffer,"\n")) != NULL){
-      if (strcmp(name, filename) == 0) return 1;
+    while((name = strsep(&buffer,"\n")) != NULL){
+      if (strcmp(name, username) == 0) return 1;
     }
     return 0;
 }
@@ -141,7 +141,7 @@ int main() {
       int serverF = fork();
       if(serverF)
       {
-        close(branch);
+        close(newsockfd);
         continue;
       }
 
@@ -183,7 +183,7 @@ int main() {
           getCommand(request, commandType);
 
           if(strcmp(commandType, "$gitProject -lgo") == 0) exit(0); //logging out
-          if(strcmp(commandType, "$gitProject -crf") == 0)
+          else if(strcmp(commandType, "$gitProject -crf") == 0)
           {
             //the client is asking to create a file
             char* filename = request + COMMANDSIZE + 1;
@@ -213,17 +213,17 @@ int main() {
 
             write(newsockfd, GOOD, 1);
           }
-          if(strcmp(commandType, "$gitProject -edt") == 0)
+          else if(strcmp(commandType, "$gitProject -edt") == 0)
           {
             //client is asking to open a file
             //server should send updated version
             char* filename = request + COMMANDSIZE + 1;
 
             //check if he is allowed
-            validate(filename, username);
+            validateUser(filename, username);
 
             //check semaphore
-            int key = ftok(filename, 120;
+            int key = ftok(filename, 12);
             int semd = semget(key, 1, 0644);
             int val = semctl(semd, 0, GETVAL);
             if(!val)
@@ -233,8 +233,6 @@ int main() {
             }
 
             //update semaphore - down
-            int key = ftok(filename, 12);
-            int semd = semget(key, 1, 0644);
             struct sembuf op;
             op.sem_num = 0;
             op.sem_op = -1;
@@ -248,7 +246,7 @@ int main() {
             write(newsockfd, GOOD, 1);
             write(newsockfd, filebuf, MAXFILESIZE);
           }
-          if(strcmp(commandType, "$gitProject -rec") == 0)
+          else if(strcmp(commandType, "$gitProject -rec") == 0)
           {
             //this is not a command, but this is the message
             //the client will send once the user is done editing a file
@@ -269,7 +267,7 @@ int main() {
             op.sem_op = 1;
             semop(semd, op, 1);
           }
-          if(strcmp(commandType, "$gitProject -rmf") == 0)
+          else if(strcmp(commandType, "$gitProject -rmf") == 0)
           {
             //the client is asking to remove a file
             char* filename = request + COMMANDSIZE + 1;
@@ -281,7 +279,7 @@ int main() {
             }
 
             //check semaphore
-            int key = ftok(filename, 120;
+            int key = ftok(filename, 12);
             int semd = semget(key, 1, 0644);
             int val = semctl(semd, 0, GETVAL);
             if(!val)
@@ -291,8 +289,6 @@ int main() {
             }
 
             //remove semaphore
-            int key = ftok(filename, 12);
-            int semd = semget(key, 1, 0644);
             semctl(semd, 0, IPC_RMID);
 
             //remove perm file
@@ -302,7 +298,7 @@ int main() {
             remove(filename);
 
           }
-          if(strcmp(commandType, "$gitProject -inv") == 0)
+          else if(strcmp(commandType, "$gitProject -inv") == 0)
           {
             //the client is asking to share a file with
             //another user
@@ -322,6 +318,7 @@ int main() {
             close(permFD);
 
           }
+          else write(newsockfd, BAD, 1);
 
           /*
           if (strcmp(subbuff, "$gitProject -c") == 0){ //creates new file

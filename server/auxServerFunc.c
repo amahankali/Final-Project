@@ -78,7 +78,7 @@ int login(char* username, char* password) {
 ///////////////////////////COMMAND-RELATED FUNCTIONS///////////////////////////
 int touch(char* filename)
 {
-  int fd = open(file_name, O_CREAT | O_EXCL);
+  int fd = open(filename, O_CREAT | O_EXCL);
   if(fd == -1) return 0; //file already exists
   close(fd);
   return 1;
