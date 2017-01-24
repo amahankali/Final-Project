@@ -91,7 +91,7 @@ void writeFile(char* buffer, char* file)
 //ending in .jfk - this new file will contain the list of users
 //allowed to see the file
 //assumes filename ends in '.txt'
-char* permFile(char* filename){
+char* permfile(char* filename){
   char* ans = calloc(1, MAXMESSAGE + 20);
   strcpy(filename, ans);
   ans = strsep(&ans, '.');
@@ -103,15 +103,14 @@ char* permFile(char* filename){
 //check if user can edit file
 int validateUser(char* filename, char* filename){
     char buffer[MAXFILESIZE];
-    char* permFile = permFile(filename);
-    copyfile(permFile, buffer);
+    char* permfile = permfile(filename);
+    copyfile(permfile, buffer);
     char* name;
     while((name = strsep(buffer,"\n")) != NULL){
       if (strcmp(name, filename) == 0) return 1;
     }
     return 0;
 }
-
 
 //char* filecopy(char buffer){}
 
@@ -204,12 +203,12 @@ int main() {
             }
 
             //setup bookkeeping: permission file, semaphore
-            char* permFile = permFile(filename);
-            int permFD = open(permFile, O_WRONLY);
+            char* permfile = permfile(filename);
+            int permFD = open(permfile, O_WRONLY);
             write(permFD, username, strlen(username));
             write(permFD, "\n", 5);
             close(permFD);
-            free(permFile);
+            free(permfile);
 
             //semaphore
             int key = ftok(filename, 12);
@@ -305,7 +304,21 @@ int main() {
 
             //go through perm file, and remove this file from the list of files
             //that each user can see
+            char* permfile = permfile(filename);
+            char allowedUsers[MAXFILESIZE];
+            copyfile(permfile, allowedUsers);
 
+            char otheruser[MAXMESSAGE];
+            while(1)
+            {
+              char* nextuser = strsep(allowedUsers, '\n');
+
+              //otheruser = strsep(allowedUsers, '\n');
+
+              //remove filename from list of allowed files of otheruser
+
+
+            }
 
             //remove perm file
             remove(permfile);

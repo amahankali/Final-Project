@@ -45,6 +45,12 @@ int signUp(char* username, char* password) {
   return 0;
 }
 
+//work to be done on signUp:
+//- create a folder for the new user in our file system
+//- create a file inside that folder that lists the other
+//  files that he has access to (besides his own)
+
+
 //checks if it is valid
 //returns 1 if valid login
 //returns 0 if not
