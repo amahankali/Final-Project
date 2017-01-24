@@ -87,29 +87,17 @@ void writeFile(char* buffer, char* file)
   close(fd);
 }
 
-//permFile is incorrect. it modifies the following letters of buffer
-char* permFile(char* buffer){
+//given a file name, it creates a name with same name, but
+//ending in .jfk - this new file will contain the list of users
+//allowed to see the file
+//assumes filename ends in '.txt'
+char* permFile(char* filename){
   char* ans = calloc(1, MAXMESSAGE + 20);
-
-  char* index = strchr(buffer, '.');
-  if(index == NULL)
-  {
-    strcpy(ans, )
-  }
-  else
-  {
-    *index = NULL;
-    strcat(ans, buffer);
-    *index = '.';
-    strcat(ans, ".jfk");
-  }
+  strcpy(filename, ans);
+  ans = strsep(&ans, '.');
+  strcat(ans, ".jfk");
   touch(ans);
   return ans;
-
-  char* filename = strsep(&buffer, '.');
-  strcat(filename, ".jfk");
-  touch(filename);
-  return filename;
 }
 
 //check if user can edit file
@@ -124,24 +112,6 @@ int validateUser(char* filename, char* filename){
     return 0;
 }
 
-//returns 1 if user is allowed to edit file, 0 if not
-//does - operation with semaphore
-int checkfile(char* filename)
-{
-
-}
-
-//user no longer editing
-//does + operation with semaphore
-void finishFile(char* filename)
-{
-  int key = ftok(filename, 12);
-  int semd = semget(key, 1, IPC_CREAT | 0644);
-  struct sembuf op;
-  op.sem_num = 0;
-  op.sem_op = 1;
-  semop(semd, &op, 1);
-}
 
 //char* filecopy(char buffer){}
 
@@ -215,11 +185,9 @@ int main() {
 
           /*
           Commands Left
-          1. $gitProject invite <FILE/DIRECTORY> <USER> allow USER to see FILE/DIRECTORY and all of its contents
-          if he chooses the second option
-          2. $gitProject createFile <FILE>: creates file with name FILE in current directory
-          3. $gitProject deleteFile <FILE>: delete file with name FILE in current directory if it exists
-          4. $gitProject open <FILE>: opens FILE in user's choice of editor
+          1. $gitProject invite <FILE> <USER> allow USER to see FILE if he chooses the second option
+          2. $gitProject deleteFile <FILE>: delete file with name FILE in current directory if it exists
+          3. $gitProject open <FILE>: opens FILE in user's choice of editor
           */
 
           if(strcmp(commandType, "$gitProject -lgo") == 0) exit(0); //logging out
@@ -241,6 +209,7 @@ int main() {
             write(permFD, username, strlen(username));
             write(permFD, "\n", 5);
             close(permFD);
+            free(permFile);
 
             //semaphore
             int key = ftok(filename, 12);
@@ -271,9 +240,9 @@ int main() {
               continue; //prompt for another command on client-side
             }
 
-            //update semaphore
+            //update semaphore - down
             int key = ftok(filename, 12);
-            int semd = semget(key, 1, IPC_CREAT | 0644);
+            int semd = semget(key, 1, 0644);
             struct sembuf op;
             op.sem_num = 0;
             op.sem_op = -1;
@@ -293,25 +262,74 @@ int main() {
             //the client will send once the user is done editing a file
             char* filename = request + COMMANDSIZE + 1;
 
-            //get contents of file
+            //get contents of file and replace contents of file
             char* filebuf = (char *) calloc(1, MAXFILESIZE + 1);
             int fd = open(filename, O_TRUNC | O_WRONLY);
             read(newsockfd, filebuf, MAXFILESIZE);
             write(fd, filebuf, MAXFILESIZE);
             close(fd);
 
-            //update semaphore
-
-
+            //update semaphore - up
+            int key = ftok(filename, 12);
+            int semd = semget(key, 1, 0644);
+            struct sembuf op;
+            op.sem_num = 0;
+            op.sem_op = 1;
+            semop(semd, op, 1);
           }
           if(strcmp(commandType, "$gitProject -rmf") == 0)
           {
             //the client is asking to remove a file
+            char* filename = request + COMMANDSIZE + 1;
+            int err = open(filename, O_CREAT | O_EXCL);
+            if(!err)
+            {
+              write(newsockfd, BAD, 1);
+              continue;
+            }
+
+            //check semaphore
+            int key = ftok(filename, 120;
+            int semd = semget(key, 1, 0644);
+            int val = semctl(semd, 0, GETVAL);
+            if(!val)
+            {
+              write(newsockfd, BAD, 1);
+              continue; //prompt for another command on client-side
+            }
+
+            //remove semaphore
+            int key = ftok(filename, 12);
+            int semd = semget(key, 1, 0644);
+            semctl(semd, 0, IPC_RMID);
+
+            //go through perm file, and remove this file from the list of files
+            //that each user can see
+
+
+            //remove perm file
+            remove(permfile);
+
+            //remove file
+            remove(filename);
+
           }
           if(strcmp(commandType, "$gitProject -inv") == 0)
           {
             //the client is asking to share a file with
             //another user
+            char* filename = request + COMMANDSIZE + 1;
+            int err = open(filename, O_CREAT | O_EXCL);
+            if(!err)
+            {
+              write(newsockfd, BAD, 1);
+              continue;
+            }
+
+            //add the other user to the permfile of this file
+
+            //add this file to list of files user can see
+
           }
 
           /*
