@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include "constant.h"
-#include "auxServerFunc.h"
+//#include "auxServerFunc.h"
 
 void error_check( int i, char *s ) {
   if ( i < 0 ) {
@@ -82,7 +82,7 @@ void writeFile(char* buffer, char* file)
   write(fd, buffer, strlen(buffer));
   close(fd);
 }
-
+/*
 void textFile(char* buffer){
   fileName = strsep(&buffer, '.');
   strcat(fileName, ".jfk");
@@ -119,7 +119,7 @@ int validateUser(char* fileName, char* userName){
 
 int main () {
 
-  int mainsd = server_setup(PORT);
+  int mainsd = server_setup(TESTPORT);
   int branch = server_connect(mainsd);
 
 

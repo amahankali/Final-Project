@@ -32,13 +32,14 @@ int client_connect(char* ip, char* port) {
   return sd;
 }
 
+
 void copyfile(char* file, char* buffer)
 {
   int fd = open(file, O_RDONLY);
   read(fd, buffer, MAXFILESIZE);
   close(fd);
 }
-
+/*
 char sendfile(char* name){
   FILE *fp;
   long lSize;
@@ -64,6 +65,7 @@ int copy(char* buffer, char* filepath){
 int clientEdit(int sockfd, char* fileName){
 
 }
+*/
 
 int main () {
 
