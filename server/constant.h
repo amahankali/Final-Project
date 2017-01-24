@@ -2,6 +2,6 @@
 #define TESTPORT "12425"
 #define MAXFILESIZE 5000 //character limit
 #define MAXMESSAGE 100 //in general, maximum length of any single communication using a socket - other than file
-#define COMMANDSIZE 15
+#define COMMANDSIZE 17
 #define BAD 'b'
 #define GOOD 'g'

@@ -184,26 +184,47 @@ int main() {
           8. We are planning to implement gcc and execute - only c code can be run using our thing
           */
 
-          if(strcmp(commandType, "$gitProject -l") == 0) exit(0); //logging out
-          if(strcmp(commandType, "$gitProject -c") == 0)
+          if(strcmp(commandType, "$gitProject -lgo") == 0) exit(0); //logging out
+          if(strcmp(commandType, "$gitProject -crf") == 0)
           {
-            //creating a file
+            //the client is asking to create a file
           }
-          if(strcmp(commandType, "$gitProject -e") == 0)
+          if(strcmp(commandType, "$gitProject -crd") == 0)
           {
-            //client is asking to edit a file
+            //the client is asking to create a directory
+          }
+          if(strcmp(commandType, "$gitProject -edt") == 0)
+          {
+            //client is asking to open a file
             //server should send updated version
           }
-          if(strcmp(commandType, "$gitProject -r") == 0)
+          if(strcmp(commandType, "$gitProject -rec") == 0)
           {
             //this is not really a command, but this is the message
             //the client will send once the user is done editing a file
           }
-          if(strcmp(commandType, "$gitProject -m") == 0)
+          if(strcmp(commandType, "$gitProject -rmf") == 0)
           {
-            //the user is asking to create a folder
+            //the client is asking to remove a file
           }
-          if(strcmp(commandType, "$gitProject -"))
+          if(strcmp(commandType, "$gitProject -rmd") == 0)
+          {
+            //the client is asking to remove a directory
+          }
+          if(strcmp(commandType, "$gitProject -inv") == 0)
+          {
+            //the client is asking to share a file with
+            //another user
+          }
+          if(strcmp(commandType, "$gitProject -gcc") == 0)
+          {
+            //the client is asking to compile a file
+          }
+          if(strcmp(commandType, "$gitProject -exe") == 0)
+          {
+            //the client is asking to execute a file
+          }
+
 
           /*
           if (strcmp(subbuff, "$gitProject -c") == 0){ //creates new file
