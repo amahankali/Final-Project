@@ -20,7 +20,8 @@ void error_check( int i, char *s ) {
 
 int client_connect(char* ip, char* port) {
 
-  int sd = socket(AF_INET, SOCK_STREAM, 0);
+  int sd = socket(AF_INET, SOCK_STREAM, 0); error_check(sd, "forming socket");
+  printf("formed socket\n");
 
   struct sockaddr_in server;
   server.sin_family = AF_INET;
@@ -28,7 +29,7 @@ int client_connect(char* ip, char* port) {
   int portno = atoi(port);
   server.sin_port = htons(portno);
 
-  connect(sd, (struct sockaddr *) &server, sizeof(server));
+  int ret = connect(sd, (struct sockaddr *) &server, sizeof(server)); error_check(ret, "connecting to server");
   return sd;
 }
 

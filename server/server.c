@@ -40,6 +40,7 @@ int server_setup(char* port) {
   i = bind( sd, (struct sockaddr *)&sock, sizeof(sock) );
   error_check( i, "server bind" );
 
+  printf("server was setup\n");
   return sd;
 }
 
@@ -50,9 +51,10 @@ int server_connect(int sd) {
   int newsockfd, i;
   struct sockaddr_in sock1, cli_addr;
 
-  i = listen(sd, 0);
+  i = listen(sd, 5);
   error_check( i, "server listen" );
 
+  printf("about to accept\n");
   unsigned int sock1_len = sizeof(sock1);
   newsockfd = accept( sd, (struct sockaddr *)&sock1, &sock1_len );
   error_check( newsockfd, "server accept" );
