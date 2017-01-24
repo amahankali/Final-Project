@@ -169,6 +169,7 @@ int run(char* a) {
         strncpy ( fileName, buffer[15], sizeof(buffer) )
         clientSend();
       }
+
       else
         int ret = execvp(buffer[0], buffer);
       if(ret)
