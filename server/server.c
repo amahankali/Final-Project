@@ -340,7 +340,12 @@ int main() {
             close(permFD);
 
           }
+          else if(strcmp(commandType, "$gitProject -rec") == 0){
+      
+
+          }
           else write(newsockfd, BAD, 1);
+
 
           /*
           if (strcmp(subbuff, "$gitProject -c") == 0){ //creates new file
