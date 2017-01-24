@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
@@ -87,7 +88,7 @@ void textFile(char* buffer){
 }
 
 void directory(char* name){
-
+  mkdir(name, S_IRUSR | S_IWUSR | S_IXUSR);
 }
 
 int validateUser(char* fileName, char* userName){
