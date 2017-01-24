@@ -117,6 +117,33 @@ int validateUser(char* fileName, char* userName){
 }
 */
 
+int main () {
+
+  int mainsd = server_setup(PORT);
+  int branch = server_connect(mainsd);
+
+
+  char* text = (char *) calloc(1, MAXFILESIZE);
+
+  //read
+  read(branch, text, MAXFILESIZE);
+  printf("[SERVER] received from client: \n");
+  printf("%s\n", text);
+
+
+  bzero(text, MAXFILESIZE);
+
+  //write
+  printf("[SERVER] writing to client\n");
+  copyfile("test.txt", text);
+  write(branch, text, MAXFILESIZE);
+
+
+  return 0;
+
+}
+
+/*
 int main() {
 
   int mainSD = server_setup(TESTPORT);
@@ -180,7 +207,7 @@ int main() {
           7. $gitProject logout
 
           8. We are planning to implement gcc and execute - only c code can be run using our thing
-          */
+
 
           if(strcmp(commandType, "$gitProject -lgo") == 0) exit(0); //logging out
           if(strcmp(commandType, "$gitProject -crf") == 0)
@@ -268,7 +295,7 @@ int main() {
             read(newsockfd,fileText,sizeof(fileText));
             writeFile(fileText, fileName);
           }
-          */
+
       }
 
 
@@ -279,3 +306,4 @@ int main() {
   return 0;
 
 }
+*/
