@@ -304,18 +304,21 @@ int main() {
             //the client is asking to share a file with
             //another user
 
-            //check if the current user is an owner of the file
-
             char* filename = request + COMMANDSIZE + 1;
-            int err = open(filename, O_CREAT | O_EXCL);
+            int err = open(filename, O_CREAT | O_EXCL); //if file does not exist, it cannot be shared
             if(!err)
             {
               write(newsockfd, BAD, 1);
               continue;
             }
 
-            //add the other user to the permfile of this file
+            //check if the user is an owner of the file -
+            //in the permFile, the user has to be first line
             char* permfile = permFile(filename);
+
+
+
+            //add the other user to the permfile of this file
             char* otheruser = filename + strlen(filename) + 1;
             int permFD = open(permfile, O_APPEND);
             write(permFD, otheruser, MAXMESSAGE);
