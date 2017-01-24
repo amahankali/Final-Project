@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include "constant.h"
+#include "main.c"
 
 void error_check( int i, char *s ) {
   if ( i < 0 ) {
@@ -69,9 +70,51 @@ int clientEdit(int sockfd, char* fileName){
 }
 
 int main () {
-
+  int loged = 0;
+  char initialBuffer[256]
   int sd = client_connect(TESTIP, TESTPORT);
+  printf("Running gitProject\n Enter your username and password to login \n If you wish to sign up please hit enter");
+  fgets(initialBuffer, sizeof(initialBuffer), stdin);
+  if (initialBuffer[0] == '\0'){
+    char newUserName[64];
+    char newPassWord[64];
+    printf("Input Username\n");
+    fgets(newUserName, sizeof(newUserName), stdin);
+    printf("Input Password\n", );
+    fgets(newPassWord, sizeof(newPassWord), stdin);
+    write(sd, "r", 1);
+    write(sd, newUserName, sizeof(newUserName));
+    write(sd, newPassWord, sizeof(newPassWord));
+    printf("You are now signed up" );
+    break
+  }
+  else{
+    write(sd, "l", 1);
+    char userName[64];
+    char passWord[64];
+    userName = strtok(initialBuffer," ");
+    passWord = strtok(initialBuffer," ");
+    write(sd, userName, sizeof(userName));
+    write(sd, passWord, sizeof(passWord));
 
+  }
+
+  while(1){
+    char buffer[256];
+    char subbuff[15];
+    scanf("%s", buffer);
+    memcpy( subbuff, &buffer, 14 );
+    subbuff[15] = '\0';
+    char fileName[64];
+    if(strcmp(subbuff, "$gitProject -e") == 0){
+      strncpy ( fileName, buffer[15], sizeof(buffer) )
+      clientEdit(fileName);
+    }
+    else if (strcmp(buffer, "$gitProject -s") == 0){
+      strncpy ( fileName, buffer[15], sizeof(buffer) )
+      clientSend();
+    }
+  }
 
 
 
