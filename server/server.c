@@ -18,8 +18,6 @@ void error_check( int i, char *s ) {
   }
 }
 
-////////////////////////CONNECTION SETUP////////////////////////
-
 //initializes the server
 int server_setup(char* port) {
 
@@ -46,8 +44,9 @@ int server_setup(char* port) {
 int server_connect(int sd) {
   int newsockfd, i;
   struct sockaddr_in sock1, cli_addr;
+  char buffer[256];
 
-  i = listen(sd, 0);
+  i = listen(sd, 5);
   error_check( i, "server listen" );
 
   unsigned int sock1_len = sizeof(sock1);
@@ -59,11 +58,9 @@ int server_connect(int sd) {
   return newsockfd;
 }
 
-////////////////////////////////////////////////////////////////
-
 void getCommand(char* request, char* command){
-  memcpy(command, request, COMMANDSIZE);
-  command[COMMANDSIZE] = 0;
+  memcpy(command, request, 14);
+  command[15] = '\0';
 }
 
 void copyfile(char* file, char* buffer)
@@ -89,6 +86,10 @@ void textFile(char* buffer, char* fileName){
   fileName = strsep(&buffer, '.');
   strcat(fileName, ".txt");
   touch(fileName);
+}
+
+void directory(char* name){
+
 }
 
 int validateUser(char* fileName, char* userName){
@@ -121,7 +122,7 @@ int validateUser(char* fileName, char* userName){
 
 int main() {
 
-  int mainSD = server_setup(TESTPORT);
+  int mainSD = server_setup(PORT);
   while(1)
   {
       int newsockfd = server_connect(mainSD);
@@ -134,99 +135,38 @@ int main() {
       }
 
       //////////////////Logging in - registers user if needed//////////////////
-      //Note: The first communication will always have to be the login/signup.
       char* type = (char *) calloc(1, 1);
       read(newsockfd, type, 1);
 
-      char* username = (char *) calloc(1, MAXMESSAGE + 1); bzero(username, MAXMESSAGE + 1);
-      char* password = (char *) calloc(1, MAXMESSAGE + 1); bzero(password, MAXMESSAGE + 1);
+      char* username = (char *) calloc(1, MAXUSERNAME);
+      char* password = (char *) calloc(1, MAXUSERNAME);
 
-      read(newsockfd, username, MAXMESSAGE); //double check if it blocks with sockets
-      read(newsockfd, password, MAXMESSAGE);
+      read(newsockfd, username, MAXUSERNAME); //double check if it blocks with sockets
+      read(newsockfd, password, MAXUSERNAME);
 
       int c;
-      if(*type == 'r') c = signUp(username, password);
+      if(type == 'r') c = signUp(username, password);
       else c = login(username, password);
-      while(!c) //these functions return 0 on failure
+      while(!c)
       {
         write(newsockfd, BAD, 1);
-        read(newsockfd, username, MAXMESSAGE); //double check if it blocks with sockets
-        read(newsockfd, password, MAXMESSAGE);
-        if(type == 'r') c = signUp(username, password);
-        else c = login(username, password);
+        read(newsockfd, username, MAXUSERNAME); //double check if it blocks with sockets
+        read(newsockfd, password, MAXUSERNAME);
       }
       write(newsockfd, GOOD, 1);
       /////////////////////////////////////////////////////////////////////////
 
 
-      char request[MAXMESSAGE + 1]; //this buffer is used to receive requests
-      bzero(request, MAXMESSAGE + 1);
 
-      char commandType[COMMANDSIZE + 1];
-      bzero(commandType, COMMANDSIZE + 1);
+      char buffer[256];
+      bzero(buffer,256);
 
       while(1)
       {
-          read(newsockfd, request, MAXMESSAGE);
-          getCommand(request, commandType);
-
-          /*
-          Types of commands and their symbols
-          1. $gitProject invite <FILE/DIRECTORY> <USER> <PERMISSIONS>: allow USER to see FILE/DIRECTORY and all of its contents
-          if he chooses the second option, and do other things depending on PERMISSIONS
-          2. $gitProject createFile <FILE>: creates file with name FILE in current directory
-          3. $gitProject createFolder <FOLDER>: creates folder with name FOLDER in current directory
-          4. $gitProject deleteFile <FILE>: delete file with name FILE in current directory if it exists
-          5. $gitProject deleteFolder <FOLDER>
-          6. $gitProject open <FILE>: opens FILE in user's choice of editor
-          7. $gitProject logout
-
-          8. We are planning to implement gcc and execute - only c code can be run using our thing
-          */
-
-          if(strcmp(commandType, "$gitProject -lgo") == 0) exit(0); //logging out
-          if(strcmp(commandType, "$gitProject -crf") == 0)
-          {
-            //the client is asking to create a file
-          }
-          if(strcmp(commandType, "$gitProject -crd") == 0)
-          {
-            //the client is asking to create a directory
-          }
-          if(strcmp(commandType, "$gitProject -edt") == 0)
-          {
-            //client is asking to open a file
-            //server should send updated version
-          }
-          if(strcmp(commandType, "$gitProject -rec") == 0)
-          {
-            //this is not really a command, but this is the message
-            //the client will send once the user is done editing a file
-          }
-          if(strcmp(commandType, "$gitProject -rmf") == 0)
-          {
-            //the client is asking to remove a file
-          }
-          if(strcmp(commandType, "$gitProject -rmd") == 0)
-          {
-            //the client is asking to remove a directory
-          }
-          if(strcmp(commandType, "$gitProject -inv") == 0)
-          {
-            //the client is asking to share a file with
-            //another user
-          }
-          if(strcmp(commandType, "$gitProject -gcc") == 0)
-          {
-            //the client is asking to compile a file
-          }
-          if(strcmp(commandType, "$gitProject -exe") == 0)
-          {
-            //the client is asking to execute a file
-          }
-
-
-          /*
+          char* n = read(newsockfd,buffer,255);
+          char subbuff[15];
+          getCommand(n, subbuff);
+          if (strcmp(subbuff, "$gitProject -l") == 0) exit(0);//logs out
           if (strcmp(subbuff, "$gitProject -c") == 0){ //creates new file
             char* file;
             char fileName[64];
@@ -241,7 +181,7 @@ int main() {
             copyfile(fileName, file);
             write(newsockfd, file, strlen(file));
           }
-          if (strcmp(subbuff, "$gitProject -r") == 0){//receives file from client and saves it on sever
+          if (strcmp(getCommand(n), "$gitProject -r") == 0){//receives file from client and saves it on sever
             char* fileText;
             char fileName[64];
             memcpy( fileName, &buffer[15], sizeof(buffer) );
@@ -249,7 +189,6 @@ int main() {
             read(newsockfd,fileText,sizeof(fileText));
             writeFile(fileText, fileName);
           }
-          */
       }
 
 
