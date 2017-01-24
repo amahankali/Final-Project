@@ -1,5 +1,5 @@
 //ALL FILENAMES ARE FILE NAMES RELATIVE TO ROOT DIRECTORY IN OUR SERVER
-//FOR ALL OF THE FUNCTIONS, RETURN 0 IF SUCCESS, -1 IF SOMETHING WRONG
+//FOR ALL OF THE FUNCTIONS, RETURN 1 IF SUCCESS, 0 IF SOMETHING WRONG
 
 //register user
 int signUp(char* user, char* password);
@@ -24,4 +24,3 @@ char* sharedItems(char* user);
 
 //make a file
 int touch(char* filename);
-

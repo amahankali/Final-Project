@@ -5,10 +5,13 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include "constant.h"
+#include "auxServerFunc.h"
 
 void error_check( int i, char *s ) {
   if ( i < 0 ) {
@@ -80,14 +83,9 @@ void writeFile(char* buffer, char* file)
   close(fd);
 }
 
-void touch (char* file_name){
-  FILE* fp = fopen( file_name, "w+" );
-  fclose(fp);
-}
-
-void textFile(char* buffer, char* fileName){
+void textFile(char* buffer){
   fileName = strsep(&buffer, '.');
-  strcat(fileName, ".txt");
+  strcat(fileName, ".jfk");
   touch(fileName);
 }
 
@@ -126,8 +124,8 @@ int main() {
   {
       int newsockfd = server_connect(mainSD);
 
-      int f = fork();
-      if(f)
+      int serverF = fork();
+      if(serverF)
       {
         close(branch);
         continue;
@@ -188,6 +186,27 @@ int main() {
           if(strcmp(commandType, "$gitProject -crf") == 0)
           {
             //the client is asking to create a file
+            char* fileName = request + COMMANDSIZE; //relative path from root of server file system to requested file
+            int c = touch(fileName);
+
+            if(!c)
+            {
+              write(newsockfd, BAD, 1);
+              continue; //prompt for another command on client-side
+            }
+
+            //setup bookkeeping: permission file, semaphore
+            textfile(fileName);
+
+            //semaphore
+            int key = ftok(fileName, 12);
+            int semd = semget(key, 1, IPC_CREAT | 0644);
+            struct sembuf op;
+            op.sem_num = 0;
+            op.sem_op = 1;
+            semop(semd, op, 1);
+
+            write(newsockfd, GOOD, 1);
           }
           if(strcmp(commandType, "$gitProject -crd") == 0)
           {
