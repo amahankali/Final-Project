@@ -80,63 +80,120 @@ int main () {
 
   int sd = client_connect(TESTIP, TESTPORT);
 
-  printf("Running gitProject\n Enter your username and password to login. \n If you wish to sign up please hit enter without typing.");
+  printf("Running gitProject\n If you wish to sign up please hit enter without typing.\n");
+  printf("Otherwise, enter your username and password on one line, separated by a space.\n");
   fgets(initialBuffer, sizeof(initialBuffer), stdin);
-  char* nLine = strchr(initialBuffer, '\n'); if(nLine) *nLine = '\0';
-  if (initialBuffer[0] == '\0'){
-    char newUserName[MAXMESSAGE];
-    char newPassWord[MAXMESSAGE];
+  char* nLine = strchr(initialBuffer, '\n'); if(nLine) *nLine = '\0'; //remove new line in initialBuffer
+
+  //////////////////Logging in - registers user if needed//////////////////
+  if (initialBuffer[0] == '\0')
+  {
+    char newUserName[MAXMESSAGE]; bzero(newUserName, MAXMESSAGE);
+    char newPassWord[MAXMESSAGE]; bzero(newPassWord, MAXMESSAGE);
+
+    //first reading of username and password
     printf("Input Username\n");
     fgets(newUserName, sizeof(newUserName), stdin);
+    nLine = strchr(newUserName, '\n'); if(nLine) *nLine = '\0';
     printf("Input Password\n", );
     fgets(newPassWord, sizeof(newPassWord), stdin);
+    nLine = strchr(newPassWord, '\n'); if(nLine) *nLine = '\0';
+    /////////////
+
     write(sd, "r", 1);
     write(sd, newUserName, sizeof(newUserName));
     write(sd, newPassWord, sizeof(newPassWord));
 
     char resp;
+    read(sd, &resp, 1);
+    while(strcmp(&resp, BAD) == 0)
+    {
+      printf("There was a problem with your attempted registration.\n");
+      printf("Input Username\n");
+      fgets(newUserName, sizeof(newUserName), stdin);
+      nLine = strchr(newUserName, '\n'); if(nLine) *nLine = '\0';
+      printf("Input Password\n", );
+      fgets(newPassWord, sizeof(newPassWord), stdin);
+      nLine = strchr(newPassWord, '\n'); if(nLine) *nLine = '\0';
 
+      write(sd, newUserName, sizeof(newUserName));
+      write(sd, newPassWord, sizeof(newPassWord));
+      read(sd, &resp, 1);
+    }
 
-    printf("You are now signed up" );
-    break
+    printf("You are now signed up.\n");
+    break;
   }
-  else{
+  else
+  {
     write(sd, "l", 1);
-    char userName[MAXMESSAGE];
-    char passWord[MAXMESSAGE];
-    userName = strtok(initialBuffer," ");
-    passWord = strtok(initialBuffer," ");
+    char userName[MAXMESSAGE]; bzero(userName, MAXMESSAGE);
+    char passWord[MAXMESSAGE]; bzero(passWord, MAXMESSAGE);
+
+    userName = strtok(initialBuffer, " ");
+    nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
+    passWord = strtok(initialBuffer, " ");
+    nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
+
     write(sd, userName, sizeof(userName));
     write(sd, passWord, sizeof(passWord));
 
-  }
+    char resp;
+    read(sd, &resp, 1);
+    while(strcmp(&resp, BAD) == 0)
+    {
+      printf("There was a problem with your attempted login.\n");
+      printf("Input Username\n");
+      fgets(newUserName, sizeof(newUserName), stdin);
+      nLine = strchr(newUserName, '\n'); if(nLine) *nLine = '\0';
+      printf("Input Password\n", );
+      fgets(newPassWord, sizeof(newPassWord), stdin);
+      nLine = strchr(newPassWord, '\n'); if(nLine) *nLine = '\0';
 
-  while(1){
-    char buffer[256];
-    char subbuff[17];
-    scanf("%s", buffer);
-    memcpy( subbuff, &buffer, 16 );
-    subbuff[17] = '\0';
-    char fileName[64];
-    if(strcmp(buffer, "$gitProject -lgo") == 0){
-      write(sd, buffer, sizeof(buffer));
+      write(sd, newUserName, sizeof(newUserName));
+      write(sd, newPassWord, sizeof(newPassWord));
+      read(sd, &resp, 1);
+    }
+
+    printf("You are now logged in.\n");
+    break;
+  }
+  /////////////////////////////////////////////////////////////////////////
+
+  while(1)
+  {
+    char request[MAXMESSAGE + 1]; bzero(request, MAXMESSAGE + 1);
+    char command[COMMANDSIZE + 1]; bzero(command, COMMANDSIZE + 1);
+
+    scanf("%s", request);
+    memcpy(command, &request, COMMANDSIZE);
+    command[COMMANDSIZE] = '\0';
+
+    char fileName[MAXMESSAGE];
+    if(strcmp(request, "$gitProject -lgo") == 0){
+      write(sd, request, sizeof(request));
+      printf("Logged Out\n");
       exit(0);
     }
-    else if(strcmp(subbuff, "$gitProject -crf") == 0){
-      write(sd, buffer, sizeof(buffer));
-
+    else if(strcmp(command, "$gitProject -crf") == 0){
+      write(sd, request, sizeof(request));
+      char resp;
+      read(sd, &resp, 1);
+      if(strcmp(&resp, GOOD) == 0) printf("File created!\n");
+      else printf("File not created.\n");
     }
-    else if(strcmp(subbuff, "$gitProject -edt") == 0){
+    ///////////////////////////////////////////////////////////
+    else if(strcmp(command, "$gitProject -edt") == 0){
       pid_t cpid;
       char text[MAXFILESIZE];
       char returnText[MAXFILESIZE];
       char status[1];
       int status;
-      write(sd, buffer, sizeof(buffer));
+      write(sd, request, sizeof(request));
       read(sd, status, 1);
-      strncpy ( fileName, buffer[17], sizeof(buffer) );
+      strncpy ( fileName, request[17], sizeof(request) );
       if (strcmp(status, BAD) == 0){
-        printf("you do not have permission to access %s", fileName);
+        printf("you do not have permission to access %s\n", fileName);
       }
       else if{
         read(sd, text, MAXFILESIZE)
@@ -167,22 +224,25 @@ int main () {
         remove(fileName);
       }
     }
-    else if (strcmp(subbuff, "$gitProject -rmf") == 0){
-      write(sd, buffer, sizeof(buffer));
+    ///////////////////////////////////////////////////////////
+    else if (strcmp(command, "$gitProject -rmf") == 0){
+      write(sd, request, sizeof(request));
+      char resp;
+      read(sd, &resp, 1);
+      if(strcmp(&resp, GOOD) == 0) printf("File removed!\n");
+      else printf("File not removed.\n");
     }
-    else if(strcmp (subbuff, "$gitProject -inv") == 0){
-      write(sd, buffer, sizeof(buffer));
+    else if(strcmp (command, "$gitProject -inv") == 0){
+      write(sd, request, sizeof(request));
+      char resp;
+      read(sd, &resp, 1);
+      if(strcmp(&resp, GOOD) == 0) printf("Collaborator invited!\n");
+      else printf("Collaborator not invited.\n");
     }
     else{
-      printf("Command is invalid");
+      printf("Request does not match any known command.\n");
     }
   }
-
-
-
-
-
-
 
   return 0;
 
