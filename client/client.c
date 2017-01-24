@@ -160,9 +160,14 @@ int main () {
         remove(fileName);
       }
     }
-    else if (strcmp(buffer, "$gitProject -s") == 0){
-      strncpy ( fileName, buffer[17], sizeof(buffer) )
-      clientSend();
+    else if (strcmp(subbuff, "$gitProject -rmf") == 0){
+      write(sd, buffer, sizeof(buffer));
+    }
+    else if(strcmp (subbuff, "$gitProject -inv") == 0){
+      write(sd, buffer, sizeof(buffer));
+    }
+    else{
+      printf("Command is invalid");
     }
   }
 
