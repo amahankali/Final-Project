@@ -184,9 +184,10 @@ int main () {
     }
     ///////////////////////////////////////////////////////////
     else if(strcmp(command, "$gitProject -edt") == 0){
+      char text[MAXFILESIZE]; bzero(text, MAXFILESIZE);
+      char returnText[MAXFILESIZE]; bzero(returnText, MAXFILESIZE);
+
       pid_t cpid;
-      char text[MAXFILESIZE];
-      char returnText[MAXFILESIZE];
       char status[1];
       int status;
       write(sd, request, sizeof(request));
