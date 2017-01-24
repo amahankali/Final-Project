@@ -182,18 +182,11 @@ int main() {
           read(newsockfd, request, MAXMESSAGE);
           getCommand(request, commandType);
 
-          /*
-          Commands Left
-          1. $gitProject invite <FILE> <USER> allow USER to see FILE if he chooses the second option
-          2. $gitProject deleteFile <FILE>: delete file with name FILE in current directory if it exists
-          3. $gitProject open <FILE>: opens FILE in user's choice of editor
-          */
-
           if(strcmp(commandType, "$gitProject -lgo") == 0) exit(0); //logging out
           if(strcmp(commandType, "$gitProject -crf") == 0)
           {
             //the client is asking to create a file
-            char* filename = request + COMMANDSIZE + 1; //relative path from root of server file system to requested file
+            char* filename = request + COMMANDSIZE + 1;
             int c = touch(filename); //+1 is because of space
 
             if(!c)
@@ -302,24 +295,6 @@ int main() {
             int semd = semget(key, 1, 0644);
             semctl(semd, 0, IPC_RMID);
 
-            //go through perm file, and remove this file from the list of files
-            //that each user can see
-            char* permfile = permfile(filename);
-            char allowedUsers[MAXFILESIZE];
-            copyfile(permfile, allowedUsers);
-
-            char otheruser[MAXMESSAGE];
-            while(1)
-            {
-              char* nextuser = strsep(allowedUsers, '\n');
-
-              //otheruser = strsep(allowedUsers, '\n');
-
-              //remove filename from list of allowed files of otheruser
-
-
-            }
-
             //remove perm file
             remove(permfile);
 
@@ -340,8 +315,11 @@ int main() {
             }
 
             //add the other user to the permfile of this file
-
-            //add this file to list of files user can see
+            char* permfile = permfile(filename);
+            char* otheruser = filename + strlen(filename) + 1;
+            int permFD = open(permfile, O_APPEND);
+            write(permFD, otheruser, MAXMESSAGE);
+            close(permFD);
 
           }
 
