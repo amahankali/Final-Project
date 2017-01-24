@@ -147,8 +147,8 @@ int main() {
 
       //////////////////Logging in - registers user if needed//////////////////
       //Note: The first communication will always have to be the login/signup.
-      char* type;
-      read(newsockfd, type, 1);
+      char type;
+      read(newsockfd, &type, 1);
 
       char username[MAXMESSAGE + 1]; bzero(username, MAXMESSAGE + 1);
       char password[MAXMESSAGE + 1]; bzero(password, MAXMESSAGE + 1);
@@ -157,14 +157,14 @@ int main() {
       read(newsockfd, password, MAXMESSAGE);
 
       int c;
-      if(*type == 'r') c = signUp(username, password);
+      if(type == 'r') c = signUp(username, password);
       else c = login(username, password);
       while(!c) //these functions return 0 on failure
       {
         write(newsockfd, BAD, 1);
         read(newsockfd, username, MAXMESSAGE); //double check if it blocks with sockets
         read(newsockfd, password, MAXMESSAGE);
-        if(*type == 'r') c = signUp(username, password);
+        if(type == 'r') c = signUp(username, password);
         else c = login(username, password);
       }
       write(newsockfd, GOOD, 1);

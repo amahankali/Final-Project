@@ -75,14 +75,17 @@ int touch(char* filename)
 }
 
 int main () {
-  int loged = 0;
-  char initialBuffer[256]
+
+  char initialBuffer[256];
+
   int sd = client_connect(TESTIP, TESTPORT);
-  printf("Running gitProject\n Enter your username and password to login \n If you wish to sign up please hit enter");
+
+  printf("Running gitProject\n Enter your username and password to login. \n If you wish to sign up please hit enter without typing.");
   fgets(initialBuffer, sizeof(initialBuffer), stdin);
+  char* nLine = strchr(initialBuffer, '\n'); if(nLine) *nLine = '\0';
   if (initialBuffer[0] == '\0'){
-    char newUserName[64];
-    char newPassWord[64];
+    char newUserName[MAXMESSAGE];
+    char newPassWord[MAXMESSAGE];
     printf("Input Username\n");
     fgets(newUserName, sizeof(newUserName), stdin);
     printf("Input Password\n", );
@@ -90,13 +93,17 @@ int main () {
     write(sd, "r", 1);
     write(sd, newUserName, sizeof(newUserName));
     write(sd, newPassWord, sizeof(newPassWord));
+
+    char resp;
+
+
     printf("You are now signed up" );
     break
   }
   else{
     write(sd, "l", 1);
-    char userName[64];
-    char passWord[64];
+    char userName[MAXMESSAGE];
+    char passWord[MAXMESSAGE];
     userName = strtok(initialBuffer," ");
     passWord = strtok(initialBuffer," ");
     write(sd, userName, sizeof(userName));
