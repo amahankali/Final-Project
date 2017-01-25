@@ -43,6 +43,14 @@ void copyfile(char* file, char* buffer)
   close(fd);
 }
 
+//replaces contents of file named file with buffer
+void writeFile(char* buffer, char* file)
+{
+  int fd = open(file, O_TRUNC | O_WRONLY); //double check
+  write(fd, buffer, strlen(buffer));
+  close(fd);
+}
+
 
 char sendfile(char* name){
   FILE *fp;
@@ -182,50 +190,52 @@ int main () {
       if(strcmp(&resp, GOOD) == 0) printf("File created!\n");
       else printf("File not created.\n");
     }
-    ///////////////////////////////////////////////////////////
     else if(strcmp(command, "$gitProject -edt") == 0){
       char text[MAXFILESIZE]; bzero(text, MAXFILESIZE);
       char returnText[MAXFILESIZE]; bzero(returnText, MAXFILESIZE);
 
-      pid_t cpid;
-      char status[1];
-      int status;
-      write(sd, request, sizeof(request));
-      read(sd, status, 1);
-      strncpy ( fileName, request[17], sizeof(request) );
-      if (strcmp(status, BAD) == 0){
-        printf("you do not have permission to access %s\n", fileName);
+      write(sd, request, MAXMESSAGE);
+      char resp;
+      read(sd, &resp, 1);
+
+      char* fileName = request + COMMANDSIZE + 1;
+      if(strcmp(status, BAD) == 0){
+        printf("You cannot access %s. Either someone is editing it, or it is not shared with you. \n", fileName);
+        continue;
       }
-      else if{
-        read(sd, text, MAXFILESIZE)
-      }
+      read(sd, text, MAXFILESIZE);
+
       touch(fileName);
-      FILE *fp = fopen(fileName, "ab");
-      if (fp != NULL)
-      {
-        fputs(text, fp);
-        fclose(fp);
-      }
+      writeFile(text, fileName);
+
       char *cmd = "emacs";
       char *argv[3];
       argv[0] = "emacs";
       argv[1] = fileName;
       argv[2] = NULL;
+
+      pid_t cpid;
       cpid = fork();
-      if (c == 0){
+      if (cpid == 0){
         execvp(cmd, argv);
         return 0;
       }
-      int status
+
+      int status;
       wait(&status);
       if(WIFEXITED(status)) {
         copyfile(fileName, returnText);
         write(sd, "$gitProject -rec", sizeof("$gitProject -rec"));
+        write(sd, “ “, 1);
+        write(sd, fileName, sizeof(fileName));
         write(sd, returnText, sizeof(returnText));
         remove(fileName);
       }
+      else{
+        write(sd, "$gitProject -non”, sizeof("$gitProject”);
+        remove(fileName);
+      }
     }
-    ///////////////////////////////////////////////////////////
     else if (strcmp(command, "$gitProject -rmf") == 0){
       write(sd, request, sizeof(request));
       char resp;

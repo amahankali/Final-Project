@@ -267,6 +267,21 @@ int main() {
             op.sem_op = 1;
             semop(semd, &op, 1);
           }
+          else if(strcmp(commandType, "$gitProject -non") == 0)
+          {
+            //this is not a command, but this is the message
+            //the client will send once the user tried to edit a file
+            //and there was an error
+            char* filename = request + COMMANDSIZE + 1;
+
+            //update semaphore - up
+            int key = ftok(filename, 12);
+            int semd = semget(key, 1, 0644);
+            struct sembuf op;
+            op.sem_num = 0;
+            op.sem_op = 1;
+            semop(semd, &op, 1);
+          }
           else if(strcmp(commandType, "$gitProject -rmf") == 0)
           {
             //the client is asking to remove a file
@@ -338,10 +353,6 @@ int main() {
             permFD = open(permfile, O_APPEND);
             write(permFD, otheruser, MAXMESSAGE);
             close(permFD);
-
-          }
-          else if(strcmp(commandType, "$gitProject -rec") == 0){
-      
 
           }
           else write(newsockfd, BAD, 1);
