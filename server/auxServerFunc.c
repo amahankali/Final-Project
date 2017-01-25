@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
@@ -91,6 +92,7 @@ int login(char* username, char* password) {
 ///////////////////////////COMMAND-RELATED FUNCTIONS///////////////////////////
 int touch(char* filename)
 {
+  umask(0000);
   int fd = open(filename, O_CREAT | O_EXCL);
   if(fd == -1) return 0; //file already exists
   close(fd);

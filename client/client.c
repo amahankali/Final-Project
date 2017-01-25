@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -69,7 +70,7 @@ int touch(char* filename)
 }
 
 int main () {
-
+  umask(0000);
   char initialBuffer[256];
 
   int sd = client_connect(TESTIP, TESTPORT);
@@ -161,9 +162,13 @@ int main () {
     char request[MAXMESSAGE + 1]; bzero(request, MAXMESSAGE + 1);
     char command[COMMANDSIZE + 1]; bzero(command, COMMANDSIZE + 1);
 
-    scanf("%s", request);
+    v2 = fgets(request, sizeof(request), stdin); error_checkF(v2, "line 164.");
+    nLine = strchr(request, '\n'); if(nLine) *nLine = '\0';
     memcpy(command, &request, COMMANDSIZE);
     command[COMMANDSIZE] = '\0';
+
+    printf("Your request was: %s.\n", request);
+    printf("Your command was: %s.\n", command);
 
     char fileName[MAXMESSAGE];
     if(strcmp(request, "$gitProject -lgo") == 0){

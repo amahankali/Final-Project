@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <netinet/in.h>
@@ -106,7 +107,7 @@ int validateUser(char* filename, char* username){
 }
 
 int main() {
-
+  umask(0000);
   int mainSD = server_setup(TESTPORT);
   while(1)
   {
