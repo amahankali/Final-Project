@@ -5,6 +5,14 @@
 #include <unistd.h>
 #include <string.h>
 
+void error_check( int i, char *s ) {
+  if ( i < 0 ) {
+    printf("%d\n", i);
+    printf("[%s] server error %d: %s\n", s, errno, strerror(errno) );
+    exit(1);
+  }
+}
+
 ///////////////////////////LOGIN-RELATED FUNCTIONS///////////////////////////
 
 char* cypher(char* x){
@@ -36,10 +44,10 @@ int signUp(char* username, char* password) {
   int f = open("users.txt", O_APPEND | O_RDWR, 0666);
   printf("\nRegistering User...\n\n");
   if(checkUsername(username) && checkUsername(password)){
-    write(f, username, sizeof(username));
-    write(f, x, sizeof(x));
-    write(f, cypher(password), sizeof(password));
-    write(f, newLine, sizeof(newLine));
+    v = write(f, username, sizeof(username)); error_check(v, "writing username");
+    v = write(f, x, sizeof(x)); error_check(v, "writing colon");
+    write(f, cypher(password), sizeof(password)); error_check(v, "writing encrypted password");
+    write(f, newLine, sizeof(newLine)); error_check(v, "writing newline");
     return 1;
   }
   return 0;

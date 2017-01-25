@@ -3,3 +3,4 @@ int checkUsername(char* x);
 int signUp(char* username, char* password);
 int login(char* username, char* password);
 int touch(char* filename);
+void error_check(int i, char* s);

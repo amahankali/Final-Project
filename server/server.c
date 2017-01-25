@@ -13,14 +13,6 @@
 #include "constant.h"
 #include "auxServerFunc.h"
 
-void error_check( int i, char *s ) {
-  if ( i < 0 ) {
-    printf("%d\n", i);
-    printf("[%s] server error %d: %s\n", s, errno, strerror(errno) );
-    exit(1);
-  }
-}
-
 ////////////////////////CONNECTION SETUP////////////////////////
 
 //initializes the server

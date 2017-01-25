@@ -76,7 +76,7 @@ int main () {
 
   printf("Running gitProject\n If you wish to sign up please hit enter without typing.\n");
   printf("Otherwise, enter your username and password on one line, separated by a space.\n");
-  int v = fgets(initialBuffer, sizeof(initialBuffer), stdin); error_checkF(v, "Reading first communication");
+  char* v = fgets(initialBuffer, sizeof(initialBuffer), stdin); error_checkF(v, "Reading first communication");
   char* nLine = strchr(initialBuffer, '\n'); if(nLine) *nLine = '\0'; //remove new line in initialBuffer
 
   //////////////////Logging in - registers user if needed//////////////////
