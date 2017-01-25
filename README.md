@@ -49,4 +49,6 @@ $gitProject -inv FILENAME OTHERUSER: gives OTHERUSER access to FILENAME, giving 
 
 These events all occur at the location of the server. However, the commands are entered at the location of the client.
 
+Multiple clients can connect to the server at once.
+
 IMPORTANT: All file names must end in .txt.
