@@ -9,17 +9,20 @@
 - constant.h
 - README.md
 - filesystem.txt
+- makefile
 - **client**
   - a.out
   - client.c
   - constant.h
   - constant.h.gch
+  - makefile
 - **server**
   - a.out
   - auxServerFunc.c
   - auxServerFunc.h
   - constant.h
   - constant.h.gch
+  - makefile
   - server.c
   - users.txt
 
