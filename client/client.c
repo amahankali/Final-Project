@@ -53,7 +53,7 @@ void writeFile(char* buffer, char* file)
 
 int touch(char* filename)
 {
-  int fd = open(file_name, O_CREAT | O_EXCL);
+  int fd = open(filename, O_CREAT | O_EXCL);
   if(fd == -1) return 0; //file already exists
   close(fd);
   return 1;
@@ -80,7 +80,7 @@ int main () {
     printf("Input Username\n");
     fgets(userName, sizeof(userName), stdin);
     nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
-    printf("Input Password\n", );
+    printf("Input Password\n");
     fgets(passWord, sizeof(passWord), stdin);
     nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
     /////////////
@@ -97,7 +97,7 @@ int main () {
       printf("Input Username\n");
       fgets(userName, sizeof(userName), stdin);
       nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
-      printf("Input Password\n", );
+      printf("Input Password\n");
       fgets(passWord, sizeof(passWord), stdin);
       nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
 
@@ -107,7 +107,6 @@ int main () {
     }
 
     printf("You are now signed up.\n");
-    break;
   }
   else
   {
@@ -134,7 +133,7 @@ int main () {
       printf("Input Username\n");
       fgets(userName, sizeof(userName), stdin);
       nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
-      printf("Input Password\n", );
+      printf("Input Password\n");
       fgets(passWord, sizeof(passWord), stdin);
       nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
 
@@ -144,7 +143,6 @@ int main () {
     }
 
     printf("You are now logged in.\n");
-    break;
   }
   /////////////////////////////////////////////////////////////////////////
 
@@ -179,7 +177,7 @@ int main () {
       read(sd, &resp, 1);
 
       char* fileName = request + COMMANDSIZE + 1;
-      if(strcmp(resp, BAD) == 0){
+      if(strcmp(&resp, BAD) == 0){
         printf("You cannot access %s. Either someone is editing it, or it is not shared with you. \n", fileName);
         continue;
       }
@@ -212,7 +210,7 @@ int main () {
         remove(fileName);
       }
       else{
-        write(sd, "$gitProject -non”, sizeof("$gitProject”);
+        write(sd, "$gitProject -non”, sizeof("$gitProject”));
         remove(fileName);
       }
     }
