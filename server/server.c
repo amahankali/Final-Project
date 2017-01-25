@@ -282,6 +282,7 @@ int main() {
             printf("Permfile of current file: %s\n", permfile);
             int permFD = open(permfile, O_WRONLY, 0666); error_check(permFD, "Opening file for permission checking");
             v = write(permFD, username, strlen(username)); error_check(v, "Setting ownership");
+            printf("Writing username %s to %s\n", username, permfile);
             v = write(permFD, "\n", 5); error_check(v, "new line");
             v = close(permFD); error_check(v, "closing permission file");
             free(permfile);
@@ -443,6 +444,8 @@ int main() {
             v = close(permFD); error_check(v, "closing permissions file");
             free(permfile);
             printf("Shared with user %s!\n", otheruser);
+
+            aWrite(newsockfd, GOOD);
           }
           else aWrite(newsockfd, BAD);
 

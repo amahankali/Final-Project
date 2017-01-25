@@ -160,7 +160,7 @@ int main () {
   printf("Running gitProject\n If you wish to sign up please hit enter without typing.\n");
   printf("Otherwise, enter your username and password on one line, separated by a space.\n");
   int v;
-  char* v2 = fgets(initialBuffer, sizeof(initialBuffer), stdin); error_checkF(v2, "Reading first communication");
+  char* v2 = fgets(initialBuffer, 256, stdin); error_checkF(v2, "Reading first communication");
   char* nLine = strchr(initialBuffer, '\n'); if(nLine) *nLine = '\0'; //remove new line in initialBuffer
 
   //////////////////Logging in - registers user if needed//////////////////
@@ -171,10 +171,10 @@ int main () {
 
     //first reading of username and password
     printf("Input Username\n");
-    v2 = fgets(userName, sizeof(userName), stdin); error_checkF(v2, "line 90");
+    v2 = fgets(userName, MAXMESSAGE, stdin); error_checkF(v2, "line 90");
     nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
     printf("Input Password\n");
-    v2 = fgets(passWord, sizeof(passWord), stdin); error_checkF(v2, "line 93");
+    v2 = fgets(passWord, MAXMESSAGE, stdin); error_checkF(v2, "line 93");
     nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
     /////////////
 
@@ -188,10 +188,10 @@ int main () {
     {
       printf("There was a problem with your attempted registration.\n");
       printf("Input Username\n");
-      v2 = fgets(userName, sizeof(userName), stdin); error_checkF(v2, "line 107");
+      v2 = fgets(userName, MAXMESSAGE, stdin); error_checkF(v2, "line 107");
       nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
       printf("Input Password\n");
-      v2 = fgets(passWord, sizeof(passWord), stdin); error_checkF(v2, "line 110");
+      v2 = fgets(passWord, MAXMESSAGE, stdin); error_checkF(v2, "line 110");
       nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
 
       aWrite(sd, userName);
@@ -224,10 +224,10 @@ int main () {
 
       printf("There was a problem with your attempted login.\n");
       printf("Input Username\n");
-      v2 = fgets(userName, sizeof(userName), stdin); error_checkF(v2, "line 143");
+      v2 = fgets(userName, MAXMESSAGE, stdin); error_checkF(v2, "line 143");
       nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
       printf("Input Password\n");
-      v2 = fgets(passWord, sizeof(passWord), stdin); error_checkF(v2, "line 146");
+      v2 = fgets(passWord, MAXMESSAGE, stdin); error_checkF(v2, "line 146");
       nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
 
       aWrite(sd, userName);
@@ -246,7 +246,7 @@ int main () {
     char request[MAXMESSAGE + 1]; bzero(request, MAXMESSAGE + 1);
     char command[COMMANDSIZE + 1]; bzero(command, COMMANDSIZE + 1);
 
-    v2 = fgets(request, sizeof(request), stdin); error_checkF(v2, "line 164.");
+    v2 = fgets(request, MAXMESSAGE, stdin); error_checkF(v2, "line 164.");
     nLine = strchr(request, '\n'); if(nLine) *nLine = '\0';
     memcpy(command, &request, COMMANDSIZE);
     command[COMMANDSIZE] = '\0';
