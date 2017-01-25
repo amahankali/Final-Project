@@ -33,7 +33,7 @@
 Initially, you will be given the options to log in or sign up.
 
 To use our file-sharing service, enter these commands on the client side:
-$gitProject -lgo: Logs out of user's account\n
+$gitProject -lgo: Logs out of user's account\r\n
 $gitProject -crf FILENAME: creates file named FILENAME, belonging to user
 $gitProject -edt FILENAME: allows user to edit the file named FILENAME in emacs. (User must be owner of file or have access to file.)
 $gitProject -rmf FILENAME: removes file named FILENAME.
