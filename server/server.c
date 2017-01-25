@@ -208,53 +208,35 @@ int main() {
             //client is asking to open a file
             //server should send updated version
             char* filename = request + COMMANDSIZE + 1;
-            printf("char* filename = request + COMMANDSIZE + 1;\n", );
+
             //check if he is allowed
             validateUser(filename, username);
-            printf("validateUser(filename, username);\n", );
 
             //check semaphore
             int key = ftok(filename, 12); error_check(key, "Getting key to edit file");
-            printf("int key = ftok(filename, 12); error_check(key, "Getting key to edit file");\n", );
             int semd = semget(key, 1, 0644); error_check(semd, "Opening semaphore of file");
-            printf("int semd = semget(key, 1, 0644); error_check(semd, "Opening semaphore of file");\n", );
             int val = semctl(semd, 0, GETVAL); error_check(val, "Value of semaphore should be nonnegative");
-            printf("  int val = semctl(semd, 0, GETVAL); error_check(val, Value of semaphore should be nonnegative);\n", );
             if(val < 0) printf("Value of semaphore was negative\n");
-            prinyf("if(val < 0) printf(Value of semaphore was negative\n);")
             if(!val)
             {
-              printf("if(!val)\n", );
               v = write(newsockfd, BAD, 1); error_check(v, "Telling that file could not be opened");
-              printf("  v = write(newsockfd, BAD, 1); error_check(v, "Telling that file could not be opened");")
               continue; //prompt for another command on client-side
             }
 
             //update semaphore - down
             struct sembuf op;
-            printf("  struct sembuf op;\n", );
             op.sem_num = 0;
-            printf("  op.sem_num = 0;\n", );
             op.sem_op = -1;
-            printf("op.sem_op = -1;\n", );
             v = semop(semd, &op, 1); error_check(v, "Marking file as editing with semaphore");
-            printf("v = semop(semd, &op, 1); error_check(v, "Marking file as editing with semaphore");\n", );
 
             //send contents of file to client
             char* filebuf = (char *) calloc(1, MAXFILESIZE + 1);
-            printf(  char* filebuf = (char *) calloc(1, MAXFILESIZE + 1););
             int fd = open(filename, O_RDONLY, 0666); error_check(fd, "Opening file to prepare for copying");
-            printf("  int fd = open(filename, O_RDONLY, 0666); error_check(fd, Opening file to prepare for copying);\n", );
             v = read(fd, filebuf, MAXFILESIZE); error_check(v, "Getting contents of file");
-            printf("v = read(fd, filebuf, MAXFILESIZE); error_check(v, Getting contents of file);\n", );
             v = close(fd); error_check(v, "Done using file for now");
-            printf("v = close(fd); error_check(v, "Done using file for now");\n", );
             v = write(newsockfd, GOOD, 1); error_check(v, "Confirming file accessible");
-            printf("v = write(newsockfd, GOOD, 1); error_check(v, "Confirming file accessible");\n", );
             v = write(newsockfd, filebuf, MAXFILESIZE); error_check(v, "Sending file over socket");
-            printf("(v = write(newsockfd, filebuf, MAXFILESIZE); error_check(v, Sending file over socket);)\n", );
             free(filebuf);
-            printf("free(filebuf);\n", );
           }
           else if(strcmp(commandType, "$gitProject -rec") == 0)
           {
