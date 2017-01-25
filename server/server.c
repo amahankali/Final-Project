@@ -168,6 +168,7 @@ int main() {
           if(strcmp(commandType, "$gitProject -lgo") == 0) exit(0); //logging out
           else if(strcmp(commandType, "$gitProject -crf") == 0)
           {
+            printf("Creating a file\n");
             //the client is asking to create a file
             char* filename = request + COMMANDSIZE + 1;
             int c = touch(filename); //+1 is because of space
@@ -200,6 +201,7 @@ int main() {
           }
           else if(strcmp(commandType, "$gitProject -edt") == 0)
           {
+            printf("editing a file\n");
             //client is asking to open a file
             //server should send updated version
             char* filename = request + COMMANDSIZE + 1;
@@ -235,6 +237,7 @@ int main() {
           }
           else if(strcmp(commandType, "$gitProject -rec") == 0)
           {
+            printf("receiving a file\n");
             //this is not a command, but this is the message
             //the client will send once the user is done editing a file
             char* filename = request + COMMANDSIZE + 1;
@@ -257,6 +260,7 @@ int main() {
           }
           else if(strcmp(commandType, "$gitProject -non") == 0)
           {
+            printf("no changes made to file\n");
             //this is not a command, but this is the message
             //the client will send once the user tried to edit a file
             //and there was an error
@@ -301,7 +305,7 @@ int main() {
           {
             //the client is asking to share a file with
             //another user
-
+            printf("sharing a file\n");
             char* filename = request + COMMANDSIZE + 1;
 
             ///////////////////////////////////////////////////////////////////////
