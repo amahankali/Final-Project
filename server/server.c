@@ -426,7 +426,7 @@ int main() {
             char* permfile = permFile(filename);
             //get first line of permfile. this should be the user
             char* owner = calloc(1, MAXMESSAGE + 1);
-            int permFD = open(permfile, O_RDONLY | O_APPEND, 0666); error_check(permFD, "getting permission file");
+            int permFD = open(permfile, O_RDWR | O_APPEND, 0666); error_check(permFD, "getting permission file");
             v = read(permFD, owner, MAXMESSAGE); error_check(v, "getting string containing name of owner");
             //close(permFD);
 
@@ -446,10 +446,14 @@ int main() {
             printf("Other user: %s\n", otheruser);
             printf("Length of other username: %lu\n", strlen(otheruser));
             //permFD = open(permfile, O_APPEND, 0666);
-            v = write(permFD, otheruser, MAXMESSAGE); error_check(v, "Adding user to permissions file");
-            v = write(permFD, "\n", 1); error_check(v, "Writing newline to permissions file");
+            int charcount = 0;
+            v = write(permFD, otheruser, strlen(username)); error_check(v, "Adding user to permissions file"); charcount += v;
+            printf("Characters written in username: %d\n", v);
+            v = write(permFD, "\n", 1); error_check(v, "Writing newline to permissions file"); charcount += v;
+            printf("Characters written in newline: %d\n", v);
             v = close(permFD); error_check(v, "closing permissions file");
             free(permfile);
+            printf("Characters written to permfile: %d\n", charcount);
             printf("Shared with user %s!\n", otheruser);
 
             aWrite(newsockfd, GOOD);
