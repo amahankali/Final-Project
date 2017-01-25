@@ -58,6 +58,68 @@ int server_connect(int sd) {
 }
 
 ////////////////////////////////////////////////////////////////
+
+///////////////Communication with Sockets///////////////
+//ENSURES THAT THE CLIENT AND SERVER STAY IN SYNC
+//THIS WAS THE PROBLEM ALL ALONG
+
+//all the buffers are null terminated
+
+//reads a message from sd of length MAXMESSAGE,
+//which is padded by #, into receiving, which then
+//replaces all # with /0
+//in the beginning, receiving is full of zeros
+//in the end, receiving is a normal string consisting
+//of the mssage, null-terminated
+//cannot use with string literals
+void aReadAux(int sd, char* receiving)
+{
+  read(sd, receiving, MAXMESSAGE);
+  char* firstZero = strchr(receiving, '#');
+  if(firstZero)
+  {
+    int zeroLength = (MAXMESSAGE + 1) - (firstZero - receiving); //length of buffer minus length of actual message
+    bzero(firstZero, zeroLength);
+  }
+}
+
+void aRead(int sd, char* str)
+{
+  char receiving[MAXMESSAGE + 1];
+  bzero(receiving, MAXMESSAGE + 1);
+  aReadAux(sd, receiving);
+  strcpy(str, receiving);
+}
+
+//sending is a char array with all zeros
+//no side effects of aWrite
+//cannot use with string literals
+void aWriteAux(int sd, char* sending)
+{
+  char* firstZero = sending + strlen(sending); char* originalFirstZero = firstZero;
+  while(firstZero < sending + MAXMESSAGE) *(firstZero++) = '#'; //sending[MAXMESSAGE] is left '\0'
+  write(sd, sending, MAXMESSAGE);
+
+  //restore message to original in case it is used again
+  firstZero = originalFirstZero;
+  while(firstZero < sending + MAXMESSAGE)
+  {
+    *firstZero = '\0';
+    firstZero++;
+  }
+}
+
+void aWrite(int sd, char* str)
+{
+  char sending[MAXMESSAGE + 1];
+  bzero(sending, MAXMESSAGE + 1);
+  strcpy(sending, str);
+  aWriteAux(sd, sending);
+}
+
+////////////////////////////////////////////////////////
+
+
 //first COMMANDSIZE letters of command are a command
 void getCommand(char* request, char* command){
   memcpy(command, request, COMMANDSIZE);
@@ -68,7 +130,7 @@ void getCommand(char* request, char* command){
 void copyfile(char* file, char* buffer)
 {
   int fd = open(file, O_RDONLY, 0666);
-  read(fd, buffer, MAXFILESIZE);
+  read(fd, buffer, MAXMESSAGE);
   close(fd);
 }
 
@@ -96,16 +158,48 @@ char* permFile(char* filename){
 
 //check if user can edit file
 int validateUser(char* filename, char* username){
-    char buffer[MAXFILESIZE];
+    char* buffer = (char *) calloc(1, MAXMESSAGE);
     char* permfile = permFile(filename);
     copyfile(permfile, buffer);
-    free(permfile);
+    printf("Contents of permfile: %s\n", buffer);
+    int i = 0;
+    for(; i < strlen(buffer); i++) printf("buffer[%d] = %c\n", i, buffer[i]);
     char* name;
+    char* oBuffer = buffer;
     while((name = strsep(&buffer,"\n")) != NULL){
-      if (strcmp(name, username) == 0) return 1;
+      printf("current username being viewed in permfile: %s\n", name);
+      if (strcmp(name, username) == 0)
+      {
+        free(oBuffer);
+        return 1;
+      }
     }
+    free(oBuffer);
     return 0;
 }
+
+/*
+int main () {
+
+  umask(0000);
+  int mainSD = server_setup(TESTPORT);
+  int newsockfd = server_connect(mainSD);
+
+  char receiving1[MAXMESSAGE + 1]; bzero(receiving1, MAXMESSAGE + 1);
+  char receiving2[MAXMESSAGE + 1]; bzero(receiving2, MAXMESSAGE + 1);
+
+  aWrite(newsockfd, "Test Send From Server\n");
+  printf("Sent the message\n");
+
+  aRead(newsockfd, receiving1);
+  aRead(newsockfd, receiving2);
+  printf("Receiving 1: %s\n", receiving1);
+  printf("Receiving 2: %s\n", receiving2);
+  close(newsockfd);
+
+}
+*/
+
 
 int main() {
   umask(0000);
@@ -123,31 +217,31 @@ int main() {
 
       //////////////////Logging in - registers user if needed//////////////////
       //Note: The first communication will always have to be the login/signup.
-      char type;
-      int v = read(newsockfd, &type, 1); error_check(v, "Type of sign-in");
+      char type[2]; type[0] = type[1] = '\0';
+      aRead(newsockfd, type);
 
       char username[MAXMESSAGE + 1]; bzero(username, MAXMESSAGE + 1);
       char password[MAXMESSAGE + 1]; bzero(password, MAXMESSAGE + 1);
 
-      v = read(newsockfd, username, MAXMESSAGE); error_check(v, "Reading username");
-      v = read(newsockfd, password, MAXMESSAGE); error_check(v, "Reading password");
+      aRead(newsockfd, username);
+      aRead(newsockfd, password);
       printf("Given username: %s\n", username);
       printf("Given password: %s\n", password);
 
       int c;
-      if(type == 'r') c = signUp(username, password);
+      if(strcmp(type, "r") == 0) c = signUp(username, password);
       else c = login(username, password);
       while(!c) //these functions return 0 on failure
       {
-        v = write(newsockfd, BAD, 1); error_check(v, "Sending response: was sign-in valid?");
-        v = read(newsockfd, username, MAXMESSAGE); error_check(v, "Reading username again");
-        v = read(newsockfd, password, MAXMESSAGE); error_check(v, "Reading password again");
-        if(type == 'r') c = signUp(username, password);
+        aWrite(newsockfd, BAD);
+        aRead(newsockfd, username);
+        aRead(newsockfd, password);
+        if(strcmp(type, "r") == 0) c = signUp(username, password);
         else c = login(username, password);
       }
-      v = write(newsockfd, GOOD, 1); error_check(v, "Response confirming login");
+      aWrite(newsockfd, GOOD);
       /////////////////////////////////////////////////////////////////////////
-
+      int v;
 
       char request[MAXMESSAGE + 1]; //this buffer is used to receive requests
       bzero(request, MAXMESSAGE + 1);
@@ -162,7 +256,7 @@ int main() {
           bzero(request, MAXMESSAGE + 1);
           bzero(commandType, MAXMESSAGE + 1);
 
-          v = read(newsockfd, request, MAXMESSAGE); error_check(v, "Getting client request");
+          aRead(newsockfd, request);
           getCommand(request, commandType);
 
           printf("Request received: %s\n", request);
@@ -179,7 +273,7 @@ int main() {
 
             if(!c)
             {
-              v = write(newsockfd, BAD, 1); error_check(v, "Telling that file could not be created");
+              aWrite(newsockfd, BAD);
               continue; //prompt for another command on client-side
             }
 
@@ -200,7 +294,7 @@ int main() {
             op.sem_op = 1;
             v = semop(semd, &op, 1); error_check(v, "Initializing semaphore for new file");
 
-            v = write(newsockfd, GOOD, 1); error_check(v, "Confirming creation of new file");
+            aWrite(newsockfd, GOOD);
           }
           else if(strcmp(commandType, "$gitProject -edt") == 0)
           {
@@ -210,16 +304,16 @@ int main() {
             char* filename = request + COMMANDSIZE + 1;
 
             //check if he is allowed
-            validateUser(filename, username);
+            validateUser(filename, username); printf("Validated user\n");
 
             //check semaphore
-            int key = ftok(filename, 12); error_check(key, "Getting key to edit file");
-            int semd = semget(key, 1, 0644); error_check(semd, "Opening semaphore of file");
-            int val = semctl(semd, 0, GETVAL); error_check(val, "Value of semaphore should be nonnegative");
+            int key = ftok(filename, 12); error_check(key, "Getting key to edit file"); printf("Got key\n");
+            int semd = semget(key, 1, 0644); error_check(semd, "Opening semaphore of file"); printf("Got semd\n");
+            int val = semctl(semd, 0, GETVAL); error_check(val, "Value of semaphore should be nonnegative"); printf("Got val\n");
             if(val < 0) printf("Value of semaphore was negative\n");
             if(!val)
             {
-              v = write(newsockfd, BAD, 1); error_check(v, "Telling that file could not be opened");
+              aWrite(newsockfd, BAD);
               continue; //prompt for another command on client-side
             }
 
@@ -228,15 +322,19 @@ int main() {
             op.sem_num = 0;
             op.sem_op = -1;
             v = semop(semd, &op, 1); error_check(v, "Marking file as editing with semaphore");
+            printf("Marked file with semaphore\n");
 
             //send contents of file to client
-            char* filebuf = (char *) calloc(1, MAXFILESIZE + 1);
+            char* filebuf = (char *) calloc(1, MAXMESSAGE + 1);
             int fd = open(filename, O_RDONLY, 0666); error_check(fd, "Opening file to prepare for copying");
-            v = read(fd, filebuf, MAXFILESIZE); error_check(v, "Getting contents of file");
+            v = read(fd, filebuf, MAXMESSAGE); error_check(v, "Getting contents of file");
             v = close(fd); error_check(v, "Done using file for now");
-            v = write(newsockfd, GOOD, 1); error_check(v, "Confirming file accessible");
-            v = write(newsockfd, filebuf, MAXFILESIZE); error_check(v, "Sending file over socket");
+            printf("Copied file into buffer\n");
+            aWrite(newsockfd, GOOD);
+            aWrite(newsockfd, filebuf);
             free(filebuf);
+
+            printf("Contents sent\n");
           }
           else if(strcmp(commandType, "$gitProject -rec") == 0)
           {
@@ -246,10 +344,10 @@ int main() {
             char* filename = request + COMMANDSIZE + 1;
 
             //get contents of file and replace contents of file
-            char* filebuf = (char *) calloc(1, MAXFILESIZE + 1);
+            char* filebuf = (char *) calloc(1, MAXMESSAGE + 1);
             int fd = open(filename, O_TRUNC | O_WRONLY, 0666); error_check(fd, "Open file for copying");
-            v = read(newsockfd, filebuf, MAXFILESIZE); error_check(v, "Get new contents from socket");
-            v = write(fd, filebuf, MAXFILESIZE); error_check(v, "Write new contents into file");
+            aRead(newsockfd, filebuf);
+            v = write(fd, filebuf, MAXMESSAGE); error_check(v, "Write new contents into file");
             v = close(fd); error_check(v, "close file");
             free(filebuf);
 
@@ -288,7 +386,7 @@ int main() {
             int val = semctl(semd, 0, GETVAL); error_check(val, "Getting value of semaphore");
             if(!val)
             {
-              v = write(newsockfd, BAD, 1); error_check(v, "Telling that file could not be removed");
+              aWrite(newsockfd, BAD);
               continue; //prompt for another command on client-side
             }
 
@@ -303,6 +401,8 @@ int main() {
             //remove file
             remove(filename);
 
+            aWrite(newsockfd, GOOD);
+
           }
           else if(strcmp(commandType, "$gitProject -inv") == 0)
           {
@@ -310,21 +410,23 @@ int main() {
             //another user
             printf("sharing a file\n");
             char* filename = request + COMMANDSIZE + 1;
+            char* nextSpace = strchr(filename, ' '); //separate file name from other user
+            *nextSpace = '\0';
 
             ///////////////////////////////////////////////////////////////////////
             //check if the user is an owner of the file (you have to be owner to invite) -
             //in the permFile, the owner will always be first line
             char* permfile = permFile(filename);
             //get first line of permfile. this should be the user
-            char* owner = calloc(1, MAXFILESIZE + 1);
+            char* owner = calloc(1, MAXMESSAGE + 1);
             int permFD = open(permfile, O_RDONLY, 0666); error_check(permFD, "getting permission file");
-            v = read(permFD, owner, MAXFILESIZE); error_check(v, "getting string containing name of owner");
+            v = read(permFD, owner, MAXMESSAGE); error_check(v, "getting string containing name of owner");
             close(permFD);
 
             owner = strsep(&owner, "\n");
             if(strcmp(username, owner)) //user is not the onwer
             {
-              v = write(newsockfd, BAD, 1); error_check(v, "Telling that user is not owner, so cannot invite");
+              aWrite(newsockfd, BAD);
               free(owner);
               free(permfile);
               continue;
@@ -341,16 +443,15 @@ int main() {
             free(permfile);
 
           }
-          else write(newsockfd, BAD, 1);
+          else aWrite(newsockfd, BAD);
 
           printf("===================================================================\n");
       }
-
-
-
-
+      close(newsockfd);
+      exit(0);
   }
 
+  close(mainSD);
   return 0;
 
 }
