@@ -159,6 +159,9 @@ int main() {
       {
           printf("===================================================================\n");
 
+          bzero(request, MAXMESSAGE + 1);
+          bzero(commandType, MAXMESSAGE + 1);
+
           v = read(newsockfd, request, MAXMESSAGE); error_check(v, "Getting client request");
           getCommand(request, commandType);
 
