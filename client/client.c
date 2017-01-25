@@ -114,9 +114,9 @@ int main () {
     char userName[MAXMESSAGE]; bzero(userName, MAXMESSAGE);
     char passWord[MAXMESSAGE]; bzero(passWord, MAXMESSAGE);
 
-    userName = strtok(initialBuffer, " ");
+    strcpy(userName, strtok(initialBuffer, " "));
     nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
-    passWord = strtok(initialBuffer, " ");
+    strcpy(passWord, strtok(initialBuffer, " "));
     nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
 
     write(sd, userName, sizeof(userName));
@@ -210,7 +210,7 @@ int main () {
         remove(fileName);
       }
       else{
-        write(sd, "$gitProject -non”, sizeof("$gitProject”));
+        write(sd, "$gitProject -non”, sizeof("$gitProject”);
         remove(fileName);
       }
     }
