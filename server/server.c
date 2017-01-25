@@ -147,11 +147,11 @@ void writeFile(char* buffer, char* file)
 //allowed to see the file
 //assumes filename ends in '.txt'
 char* permFile(char* filename){
-  char* ans = calloc(1, MAXMESSAGE + 20);
+  char* ans = calloc(1, MAXMESSAGE + 1);
   strcpy(ans, filename);
   ans = strsep(&ans, ".");
   strcat(ans, ".jfk");
-  touch(ans);
+  //touch(ans);
   printf("permfile of %s: %s\n", filename, ans);
   return ans;
 }
@@ -280,10 +280,10 @@ int main() {
             //setup bookkeeping: permission file, semaphore
             char* permfile = permFile(filename);
             printf("Permfile of current file: %s\n", permfile);
-            int permFD = open(permfile, O_WRONLY, 0666); error_check(permFD, "Opening file for permission checking");
+            int permFD = open(permfile, O_CREAT | O_WRONLY, 0666); error_check(permFD, "Opening file for permission checking");
             v = write(permFD, username, strlen(username)); error_check(v, "Setting ownership");
             printf("Writing username %s to %s\n", username, permfile);
-            v = write(permFD, "\n", 5); error_check(v, "new line");
+            v = write(permFD, "\n", 1); error_check(v, "new line");
             v = close(permFD); error_check(v, "closing permission file");
             free(permfile);
 
@@ -411,6 +411,7 @@ int main() {
             //another user
             printf("sharing a file\n");
             char* filename = request + COMMANDSIZE + 1;
+            printf("Given share request: %s\n", filename);
             char* nextSpace = strchr(filename, ' '); //separate file name from other user
             *nextSpace = '\0';
 
@@ -420,7 +421,7 @@ int main() {
             char* permfile = permFile(filename);
             //get first line of permfile. this should be the user
             char* owner = calloc(1, MAXMESSAGE + 1);
-            int permFD = open(permfile, O_RDWR | O_APPEND, 0666); error_check(permFD, "getting permission file");
+            int permFD = open(permfile, O_RDONLY | O_APPEND, 0666); error_check(permFD, "getting permission file");
             v = read(permFD, owner, MAXMESSAGE); error_check(v, "getting string containing name of owner");
             //close(permFD);
 
@@ -433,14 +434,15 @@ int main() {
               continue;
             }
             free(owner);
-            ///////////////////////////////////////////////////////////////////////
-
+            ///////////////////////////////////////////////////////////////////////            
 
             //add the other user to the permfile of this file
-            char* otheruser = filename + strlen(filename) + 1;
+            char* otheruser = nextSpace + 1;
             printf("Other user: %s\n", otheruser);
+            printf("Length of other username: %lu\n", strlen(otheruser));
             //permFD = open(permfile, O_APPEND, 0666);
             v = write(permFD, otheruser, MAXMESSAGE); error_check(v, "Adding user to permissions file");
+            v = write(permFD, "\n", 1); error_check(v, "Writing newline to permissions file");
             v = close(permFD); error_check(v, "closing permissions file");
             free(permfile);
             printf("Shared with user %s!\n", otheruser);

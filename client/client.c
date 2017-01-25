@@ -341,7 +341,7 @@ int main () {
       aRead(sd, resp);
       if(strcmp(resp, GOOD) == 0) printf("Collaborator invited!\n");
       else if(strcmp(resp, BAD) == 0) printf("Collaborator not invited.\n");
-      printf("No response from server.\n");
+      else printf("No response from server.\n");
     }
     else{
       printf("Request does not match any known command.\n");
