@@ -6,28 +6,22 @@
 
 #Repository Contents
 - DESIGN
-- constant.h
 - README.md
-- filesystem.txt
 - makefile
 - **client**
-  - a.out
   - client.c
   - constant.h
-  - constant.h.gch
   - makefile
 - **server**
-  - a.out
   - auxServerFunc.c
   - auxServerFunc.h
   - constant.h
-  - constant.h.gch
   - makefile
   - server.c
   - users.txt
 
 ##How to Use
-**Compile**: Simply use the makefile by typing in "make"
+**Compile**: Type make in the highest directory of the repository.
 
 **Set up Connection**: In constant.h (in both the client and the server directories) change TESTIP to the desired IP address of the server
 
