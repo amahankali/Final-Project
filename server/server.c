@@ -67,7 +67,7 @@ void getCommand(char* request, char* command){
 //copies contents of file named file into buffer
 void copyfile(char* file, char* buffer)
 {
-  int fd = open(file, O_RDONLY);
+  int fd = open(file, O_RDONLY, 0666);
   read(fd, buffer, MAXFILESIZE);
   close(fd);
 }
@@ -75,7 +75,7 @@ void copyfile(char* file, char* buffer)
 //replaces contents of file named file with buffer
 void writeFile(char* buffer, char* file)
 {
-  int fd = open(file, O_TRUNC | O_WRONLY); //double check
+  int fd = open(file, O_TRUNC | O_WRONLY, 0666); //double check
   write(fd, buffer, strlen(buffer));
   close(fd);
 }
@@ -86,7 +86,7 @@ void writeFile(char* buffer, char* file)
 //assumes filename ends in '.txt'
 char* permFile(char* filename){
   char* ans = calloc(1, MAXMESSAGE + 20);
-  strcpy(filename, ans);
+  strcpy(ans, filename);
   ans = strsep(&ans, ".");
   strcat(ans, ".jfk");
   touch(ans);
@@ -162,12 +162,16 @@ int main() {
           v = read(newsockfd, request, MAXMESSAGE); error_check(v, "Getting client request");
           getCommand(request, commandType);
 
+          printf("Request received: %s\n", request);
+          printf("Command received: %s\n", commandType);
+
           if(strcmp(commandType, "$gitProject -lgo") == 0) exit(0); //logging out
           else if(strcmp(commandType, "$gitProject -crf") == 0)
           {
             //the client is asking to create a file
             char* filename = request + COMMANDSIZE + 1;
             int c = touch(filename); //+1 is because of space
+            printf("Filename being created: %s\n", filename);
 
             if(!c)
             {
@@ -177,7 +181,8 @@ int main() {
 
             //setup bookkeeping: permission file, semaphore
             char* permfile = permFile(filename);
-            int permFD = open(permfile, O_WRONLY); error_check(permFD, "Opening file for permission checking");
+            printf("Permfile of current file: %s\n", permfile);
+            int permFD = open(permfile, O_WRONLY, 0666); error_check(permFD, "Opening file for permission checking");
             v = write(permFD, username, strlen(username)); error_check(v, "Setting ownership");
             v = write(permFD, "\n", 5); error_check(v, "new line");
             v = close(permFD); error_check(v, "closing permission file");
@@ -221,7 +226,7 @@ int main() {
 
             //send contents of file to client
             char* filebuf = (char *) calloc(1, MAXFILESIZE + 1);
-            int fd = open(filename, O_RDONLY); error_check(fd, "Opening file to prepare for copying");
+            int fd = open(filename, O_RDONLY, 0666); error_check(fd, "Opening file to prepare for copying");
             v = read(fd, filebuf, MAXFILESIZE); error_check(v, "Getting contents of file");
             v = close(fd); error_check(v, "Done using file for now");
             v = write(newsockfd, GOOD, 1); error_check(v, "Confirming file accessible");
@@ -236,7 +241,7 @@ int main() {
 
             //get contents of file and replace contents of file
             char* filebuf = (char *) calloc(1, MAXFILESIZE + 1);
-            int fd = open(filename, O_TRUNC | O_WRONLY); error_check(fd, "Open file for copying");
+            int fd = open(filename, O_TRUNC | O_WRONLY, 0666); error_check(fd, "Open file for copying");
             v = read(newsockfd, filebuf, MAXFILESIZE); error_check(v, "Get new contents from socket");
             v = write(fd, filebuf, MAXFILESIZE); error_check(v, "Write new contents into file");
             v = close(fd); error_check(v, "close file");
@@ -269,12 +274,6 @@ int main() {
           {
             //the client is asking to remove a file
             char* filename = request + COMMANDSIZE + 1;
-            int err = open(filename, O_CREAT | O_EXCL);
-            if(!err)
-            {
-              v = write(newsockfd, BAD, 1); error_check(v, "Telling that file cannot be removed");
-              continue;
-            }
 
             //check semaphore
             int key = ftok(filename, 12); error_check(key, "Getting key for semaphore");
@@ -304,12 +303,6 @@ int main() {
             //another user
 
             char* filename = request + COMMANDSIZE + 1;
-            int err = open(filename, O_CREAT | O_EXCL); //if file does not exist, it cannot be shared
-            if(!err)
-            {
-              write(newsockfd, BAD, 1);
-              continue;
-            }
 
             ///////////////////////////////////////////////////////////////////////
             //check if the user is an owner of the file (you have to be owner to invite) -
@@ -317,7 +310,7 @@ int main() {
             char* permfile = permFile(filename);
             //get first line of permfile. this should be the user
             char* owner = calloc(1, MAXFILESIZE + 1);
-            int permFD = open(permfile, O_RDONLY); error_check(permFD, "getting permission file");
+            int permFD = open(permfile, O_RDONLY, 0666); error_check(permFD, "getting permission file");
             v = read(permFD, owner, MAXFILESIZE); error_check(v, "getting string containing name of owner");
             close(permFD);
 
@@ -335,7 +328,7 @@ int main() {
 
             //add the other user to the permfile of this file
             char* otheruser = filename + strlen(filename) + 1;
-            permFD = open(permfile, O_APPEND);
+            permFD = open(permfile, O_APPEND, 0666);
             v = write(permFD, otheruser, MAXMESSAGE); error_check(v, "Adding user to permissions file");
             v = close(permFD); error_check(v, "closing permissions file");
             free(permfile);

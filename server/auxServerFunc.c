@@ -93,8 +93,7 @@ int login(char* username, char* password) {
 int touch(char* filename)
 {
   umask(0000);
-  int fd = open(filename, O_CREAT | O_EXCL);
-  if(fd == -1) return 0; //file already exists
+  int fd = open(filename, O_CREAT, 0644);
   close(fd);
   return 1;
 }

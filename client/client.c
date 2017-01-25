@@ -48,7 +48,7 @@ int client_connect(char* ip, char* port) {
 
 void copyfile(char* file, char* buffer)
 {
-  int fd = open(file, O_RDONLY);
+  int fd = open(file, O_RDONLY, 0666);
   read(fd, buffer, MAXFILESIZE);
   close(fd);
 }
@@ -56,14 +56,14 @@ void copyfile(char* file, char* buffer)
 //replaces contents of file named file with buffer
 void writeFile(char* buffer, char* file)
 {
-  int fd = open(file, O_TRUNC | O_WRONLY); //double check
+  int fd = open(file, O_TRUNC | O_WRONLY, 0666); //double check
   write(fd, buffer, strlen(buffer));
   close(fd);
 }
 
 int touch(char* filename)
 {
-  int fd = open(filename, O_CREAT | O_EXCL);
+  int fd = open(filename, O_CREAT | O_EXCL, 0666);
   if(fd == -1) return 0; //file already exists
   close(fd);
   return 1;
