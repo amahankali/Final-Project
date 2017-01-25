@@ -90,6 +90,7 @@ char* permFile(char* filename){
   ans = strsep(&ans, ".");
   strcat(ans, ".jfk");
   touch(ans);
+  printf("permfile of %s: %s\n", filename, ans);
   return ans;
 }
 
@@ -156,6 +157,8 @@ int main() {
 
       while(1)
       {
+          printf("===================================================================\n");
+
           v = read(newsockfd, request, MAXMESSAGE); error_check(v, "Getting client request");
           getCommand(request, commandType);
 
@@ -340,6 +343,7 @@ int main() {
           }
           else write(newsockfd, BAD, 1);
 
+          printf("===================================================================\n");
       }
 
 

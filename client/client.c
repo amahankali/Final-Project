@@ -159,6 +159,8 @@ int main () {
 
   while(1)
   {
+    printf("===================================================================\n");
+
     char request[MAXMESSAGE + 1]; bzero(request, MAXMESSAGE + 1);
     char command[COMMANDSIZE + 1]; bzero(command, COMMANDSIZE + 1);
 
@@ -246,6 +248,8 @@ int main () {
     else{
       printf("Request does not match any known command.\n");
     }
+
+    printf("===================================================================\n");
   }
 
   return 0;
