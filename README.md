@@ -28,6 +28,6 @@
 
 **Set up Connection**: In constant.h (in both the client and the server directories) change TESTIP to the desired IP address of the server
 
-**Run Client**: Type in the command "make client"
+**Run Client**: Change to the "client" directory and type in the command "make run"
 
-**Run Server**: On the machine with the same IP address as the one given to TESTIP type in "make server"
+**Run Server**: Change to the "server" directory and type in the command "make run"
