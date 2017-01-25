@@ -221,9 +221,6 @@ int main () {
       v = wait(&status); error_check(v, "line 212");
       if(WIFEXITED(status)) {
         copyfile(fileName, returnText);
-        printf("Changing the file\n");
-        printf("New text: \n");
-        printf("%s\n", returnText);
         v = write(sd, "$gitProject -rec", sizeof("$gitProject -rec")); error_check(v, "line 215"); printf("1\n");
         v = write(sd, " ", 1); error_check(v, "line 216"); printf("2\n");
         v = write(sd, fileName, sizeof(fileName)); error_check(v, "line 217"); printf("3\n");
