@@ -215,18 +215,23 @@ int main () {
         v = execvp(cmd, argv); error_check(v, "line 207");
         return 0;
       }
+      printf("Finished running emacs\n");
 
       int status;
       v = wait(&status); error_check(v, "line 212");
       if(WIFEXITED(status)) {
         copyfile(fileName, returnText);
-        v = write(sd, "$gitProject -rec", sizeof("$gitProject -rec")); error_check(v, "line 215");
-        v = write(sd, " ", 1); error_check(v, "line 216");
-        v = write(sd, fileName, sizeof(fileName)); error_check(v, "line 217");
-        v = write(sd, returnText, sizeof(returnText)); error_check(v, "line 218");
+        printf("Changing the file\n");
+        printf("New text: \n");
+        printf("%s\n", returnText);
+        v = write(sd, "$gitProject -rec", sizeof("$gitProject -rec")); error_check(v, "line 215"); printf("1\n");
+        v = write(sd, " ", 1); error_check(v, "line 216"); printf("2\n");
+        v = write(sd, fileName, sizeof(fileName)); error_check(v, "line 217"); printf("3\n");
+        v = write(sd, returnText, strlen(returnText)); error_check(v, "line 218"); printf("4\n");
         remove(fileName);
       }
       else{
+        printf("Not changing the file\n");
         v = write(sd, "$gitProject -non", sizeof("$gitProject")); error_check(v, "line 222");
         remove(fileName);
       }
