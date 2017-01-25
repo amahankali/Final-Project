@@ -208,10 +208,7 @@ int main() {
             //client is asking to open a file
             //server should send updated version
             char* filename = request + COMMANDSIZE + 1;
-<<<<<<< HEAD
-=======
 
->>>>>>> 362d1a76dcad02d2c94bc49a7bd13797177b3d8c
             //check if he is allowed
             validateUser(filename, username);
 
