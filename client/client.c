@@ -332,14 +332,16 @@ int main () {
       char resp[2]; resp[0] = resp[1] = '\0';
       aRead(sd, resp);
       if(strcmp(resp, GOOD) == 0) printf("File removed!\n");
-      else printf("File not removed.\n");
+      else if(strcmp(resp, BAD) == 0) printf("File not removed.\n");
+      else printf("No response from server.\n");
     }
     else if(strcmp (command, "$gitProject -inv") == 0){
       aWrite(sd, request);
       char resp[2]; resp[0] = resp[1] = '\0';
       aRead(sd, resp);
       if(strcmp(resp, GOOD) == 0) printf("Collaborator invited!\n");
-      else printf("Collaborator not invited.\n");
+      else if(strcmp(resp, BAD) == 0) printf("Collaborator not invited.\n");
+      printf("No response from server.\n");
     }
     else{
       printf("Request does not match any known command.\n");
