@@ -51,29 +51,6 @@ void writeFile(char* buffer, char* file)
   close(fd);
 }
 
-
-char sendfile(char* name){
-  FILE *fp;
-  long lSize;
-  char *buffer;
-  fp = fopen ( name , "rb" );
-  fseek( fp , 0L , SEEK_END);
-  lSize = ftell( fp );
-  rewind( fp );
-  buffer = calloc( 1, lSize+1 );
-  fread( buffer , lSize, 1 , fp) )
-  fclose(fp);
-  return buffer;
-}
-
-int copy(char* buffer, char* filepath){
-  FILE *fp = fopen(filepath, "ab");
-  if (fp != NULL){
-    fputs(buffer, fp);
-    fclose(fp);
-  }
-}
-
 int touch(char* filename)
 {
   int fd = open(file_name, O_CREAT | O_EXCL);
@@ -199,7 +176,7 @@ int main () {
       read(sd, &resp, 1);
 
       char* fileName = request + COMMANDSIZE + 1;
-      if(strcmp(status, BAD) == 0){
+      if(strcmp(resp, BAD) == 0){
         printf("You cannot access %s. Either someone is editing it, or it is not shared with you. \n", fileName);
         continue;
       }
