@@ -16,7 +16,7 @@
 void error_check( int i, char *s ) {
   if ( i < 0 ) {
     printf("%d\n", i);
-    printf("[%s] error %d: %s\n", s, errno, strerror(errno) );
+    printf("[%s] server error %d: %s\n", s, errno, strerror(errno) );
     exit(1);
   }
 }
@@ -105,31 +105,13 @@ int validateUser(char* filename, char* username){
     char buffer[MAXFILESIZE];
     char* permfile = permFile(filename);
     copyfile(permfile, buffer);
+    free(permfile);
     char* name;
     while((name = strsep(&buffer,"\n")) != NULL){
       if (strcmp(name, username) == 0) return 1;
     }
     return 0;
 }
-
-//char* filecopy(char buffer){}
-
-
-/*char savefile(char name){
-  FILE *fp;
-  long lSize;
-  char *buffer;
-  fp = fopen ( name , "rb" );
-  fseek( fp , 0L, SEEK_END);
-  lSize = ftell( fp );
-  rewind( fp );
-  buffer = calloc( 1, lSize+1 );
-  fread( buffer , lSize, 1 , fp) )
-  fclose(fp);
-  return buffer;
-}
-*/
-
 
 int main() {
 
@@ -148,26 +130,26 @@ int main() {
       //////////////////Logging in - registers user if needed//////////////////
       //Note: The first communication will always have to be the login/signup.
       char type;
-      read(newsockfd, &type, 1);
+      int v = read(newsockfd, &type, 1); error_check(v, "Type of sign-in");
 
       char username[MAXMESSAGE + 1]; bzero(username, MAXMESSAGE + 1);
       char password[MAXMESSAGE + 1]; bzero(password, MAXMESSAGE + 1);
 
-      read(newsockfd, username, MAXMESSAGE); //double check if it blocks with sockets
-      read(newsockfd, password, MAXMESSAGE);
+      v = read(newsockfd, username, MAXMESSAGE); error_check(v, "Reading username");
+      v = read(newsockfd, password, MAXMESSAGE); error_check(v, "Reading password");
 
       int c;
       if(type == 'r') c = signUp(username, password);
       else c = login(username, password);
       while(!c) //these functions return 0 on failure
       {
-        write(newsockfd, BAD, 1);
-        read(newsockfd, username, MAXMESSAGE); //double check if it blocks with sockets
-        read(newsockfd, password, MAXMESSAGE);
+        v = write(newsockfd, BAD, 1); error_check(v, "Sending response: was sign-in valid?");
+        v = read(newsockfd, username, MAXMESSAGE); error_check(v, "Reading username again");
+        v = read(newsockfd, password, MAXMESSAGE); error_check(v, "Reading password again");
         if(type == 'r') c = signUp(username, password);
         else c = login(username, password);
       }
-      write(newsockfd, GOOD, 1);
+      v = write(newsockfd, GOOD, 1); error_check(v, "Response confirming login");
       /////////////////////////////////////////////////////////////////////////
 
 
@@ -179,7 +161,7 @@ int main() {
 
       while(1)
       {
-          read(newsockfd, request, MAXMESSAGE);
+          v = read(newsockfd, request, MAXMESSAGE); error_check(v, "Getting client request");
           getCommand(request, commandType);
 
           if(strcmp(commandType, "$gitProject -lgo") == 0) exit(0); //logging out
@@ -191,27 +173,27 @@ int main() {
 
             if(!c)
             {
-              write(newsockfd, BAD, 1);
+              v = write(newsockfd, BAD, 1); error_check(v, "Telling that file could not be created");
               continue; //prompt for another command on client-side
             }
 
             //setup bookkeeping: permission file, semaphore
             char* permfile = permFile(filename);
-            int permFD = open(permfile, O_WRONLY);
-            write(permFD, username, strlen(username));
-            write(permFD, "\n", 5);
-            close(permFD);
+            int permFD = open(permfile, O_WRONLY); error_check(permFD, "Opening file for permission checking");
+            v = write(permFD, username, strlen(username)); error_check(v, "Setting ownership");
+            v = write(permFD, "\n", 5); error_check(v, "new line");
+            v = close(permFD); error_check(v, "closing permission file");
             free(permfile);
 
             //semaphore
-            int key = ftok(filename, 12);
-            int semd = semget(key, 1, IPC_CREAT | 0644);
+            int key = ftok(filename, 12); error_check(key, "Making key to create semaphore");
+            int semd = semget(key, 1, IPC_CREAT | 0644); error_check(semd, "Creating semaphore for new file");
             struct sembuf op;
             op.sem_num = 0;
             op.sem_op = 1;
-            semop(semd, &op, 1);
+            v = semop(semd, &op, 1); error_check(v, "Initializing semaphore for new file");
 
-            write(newsockfd, GOOD, 1);
+            v = write(newsockfd, GOOD, 1); error_check(v, "Confirming creation of new file");
           }
           else if(strcmp(commandType, "$gitProject -edt") == 0)
           {
@@ -223,12 +205,13 @@ int main() {
             validateUser(filename, username);
 
             //check semaphore
-            int key = ftok(filename, 12);
-            int semd = semget(key, 1, 0644);
-            int val = semctl(semd, 0, GETVAL);
+            int key = ftok(filename, 12); error_check(key, "Getting key to edit file");
+            int semd = semget(key, 1, 0644); error_check(semd, "Opening semaphore of file");
+            int val = semctl(semd, 0, GETVAL); error_check(val, "Value of semaphore should be nonnegative");
+            if(val < 0) printf("Value of semaphore was negative\n");
             if(!val)
             {
-              write(newsockfd, BAD, 1);
+              v = write(newsockfd, BAD, 1); error_check(v, "Telling that file could not be opened");
               continue; //prompt for another command on client-side
             }
 
@@ -236,15 +219,16 @@ int main() {
             struct sembuf op;
             op.sem_num = 0;
             op.sem_op = -1;
-            semop(semd, &op, 1);
+            v = semop(semd, &op, 1); error_check(v, "Marking file as editing with semaphore");
 
             //send contents of file to client
             char* filebuf = (char *) calloc(1, MAXFILESIZE + 1);
-            int fd = open(filename, O_RDONLY);
-            read(fd, filebuf, MAXFILESIZE);
-            close(fd);
-            write(newsockfd, GOOD, 1);
-            write(newsockfd, filebuf, MAXFILESIZE);
+            int fd = open(filename, O_RDONLY); error_check(fd, "Opening file to prepare for copying");
+            v = read(fd, filebuf, MAXFILESIZE); error_check(v, "Getting contents of file");
+            v = close(fd); error_check(v, "Done using file for now");
+            v = write(newsockfd, GOOD, 1); error_check(v, "Confirming file accessible");
+            v = write(newsockfd, filebuf, MAXFILESIZE); error_check(v, "Sending file over socket");
+            free(filebuf);
           }
           else if(strcmp(commandType, "$gitProject -rec") == 0)
           {
@@ -254,18 +238,19 @@ int main() {
 
             //get contents of file and replace contents of file
             char* filebuf = (char *) calloc(1, MAXFILESIZE + 1);
-            int fd = open(filename, O_TRUNC | O_WRONLY);
-            read(newsockfd, filebuf, MAXFILESIZE);
-            write(fd, filebuf, MAXFILESIZE);
-            close(fd);
+            int fd = open(filename, O_TRUNC | O_WRONLY); error_check(fd, "Open file for copying");
+            v = read(newsockfd, filebuf, MAXFILESIZE); error_check(v, "Get new contents from socket");
+            v = write(fd, filebuf, MAXFILESIZE); error_check(v, "Write new contents into file");
+            v = close(fd); error_check(v, "close file");
+            free(filebuf);
 
             //update semaphore - up
-            int key = ftok(filename, 12);
-            int semd = semget(key, 1, 0644);
+            int key = ftok(filename, 12); error_check(key, "Getting key to receive file");
+            int semd = semget(key, 1, 0644); error_check(semd, "Access semaphore - change made");
             struct sembuf op;
             op.sem_num = 0;
             op.sem_op = 1;
-            semop(semd, &op, 1);
+            v = semop(semd, &op, 1); error_check(v, "Allow other users to access file - increment semaphore - change made");
           }
           else if(strcmp(commandType, "$gitProject -non") == 0)
           {
@@ -275,12 +260,12 @@ int main() {
             char* filename = request + COMMANDSIZE + 1;
 
             //update semaphore - up
-            int key = ftok(filename, 12);
-            int semd = semget(key, 1, 0644);
+            int key = ftok(filename, 12); error_check(key, "Getting key to allow access to file");
+            int semd = semget(key, 1, 0644); error_check(semd, "Access semaphore - no change made");
             struct sembuf op;
             op.sem_num = 0;
             op.sem_op = 1;
-            semop(semd, &op, 1);
+            v = semop(semd, &op, 1); error_check(v, "Allow other users to access file - increment semaphore - no change made");
           }
           else if(strcmp(commandType, "$gitProject -rmf") == 0)
           {
@@ -289,26 +274,27 @@ int main() {
             int err = open(filename, O_CREAT | O_EXCL);
             if(!err)
             {
-              write(newsockfd, BAD, 1);
+              v = write(newsockfd, BAD, 1); error_check(v, "Telling that file cannot be removed");
               continue;
             }
 
             //check semaphore
-            int key = ftok(filename, 12);
-            int semd = semget(key, 1, 0644);
-            int val = semctl(semd, 0, GETVAL);
+            int key = ftok(filename, 12); error_check(key, "Getting key for semaphore");
+            int semd = semget(key, 1, 0644); error_check(semd, "Access semaphore");
+            int val = semctl(semd, 0, GETVAL); error_check(val, "Getting value of semaphore");
             if(!val)
             {
-              write(newsockfd, BAD, 1);
+              v = write(newsockfd, BAD, 1); error_check(v, "Telling that file could not be removed");
               continue; //prompt for another command on client-side
             }
 
             //remove semaphore
-            semctl(semd, 0, IPC_RMID);
+            v = semctl(semd, 0, IPC_RMID); error_check(v, "Semaphore could not be removed");
 
             //remove perm file
             char* permfile = permFile(filename);
             remove(permfile);
+            free(permfile);
 
             //remove file
             remove(filename);
@@ -333,15 +319,16 @@ int main() {
             char* permfile = permFile(filename);
             //get first line of permfile. this should be the user
             char* owner = calloc(1, MAXFILESIZE + 1);
-            int permFD = open(permfile, O_RDONLY);
-            read(permFD, owner, MAXFILESIZE);
+            int permFD = open(permfile, O_RDONLY); error_check(permFD, "getting permission file");
+            v = read(permFD, owner, MAXFILESIZE); error_check(v, "getting string containing name of owner");
             close(permFD);
 
             owner = strsep(&owner, "\n");
             if(strcmp(username, owner)) //user is not the onwer
             {
-              write(newsockfd, BAD, 1);
+              v = write(newsockfd, BAD, 1); error_check(v, "Telling that user is not owner, so cannot invite");
               free(owner);
+              free(permfile);
               continue;
             }
             free(owner);
@@ -351,38 +338,12 @@ int main() {
             //add the other user to the permfile of this file
             char* otheruser = filename + strlen(filename) + 1;
             permFD = open(permfile, O_APPEND);
-            write(permFD, otheruser, MAXMESSAGE);
-            close(permFD);
+            v = write(permFD, otheruser, MAXMESSAGE); error_check(v, "Adding user to permissions file");
+            v = close(permFD); error_check(v, "closing permissions file");
+            free(permfile);
 
           }
           else write(newsockfd, BAD, 1);
-
-
-          /*
-          if (strcmp(subbuff, "$gitProject -c") == 0){ //creates new file
-            char* file;
-            char filename[64];
-            memcpy( filename, &buffer[15], sizeof(buffer) );
-            touch(filename);
-            textfile(filename); //creates text file that we can insert permissions
-          }
-          if (strcmp(subbuff, "$gitProject -e") == 0){//send file to client
-            char* file;
-            char filename[64];
-            memcpy( filename, &buffer[15], sizeof(buffer) );
-            copyfile(filename, file);
-            write(newsockfd, file, strlen(file));
-          }
-          if (strcmp(subbuff, "$gitProject -r") == 0){//receives file from client and saves it on sever
-            char* fileText;
-            char filename[64];
-            memcpy( filename, &buffer[15], sizeof(buffer) );
-            char file[MAXFILESIZE];
-            read(newsockfd,fileText,sizeof(fileText));
-            writeFile(fileText, filename);
-          }
-          */
-
 
       }
 

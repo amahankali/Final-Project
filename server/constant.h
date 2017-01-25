@@ -2,7 +2,7 @@
 #define TESTPORT "12911"
 #define MAXFILESIZE 5000 //character limit
 #define MAXMESSAGE 100 //in general, maximum length of any single communication using a socket - other than file
-#define COMMANDSIZE 17
+#define COMMANDSIZE 16
 #define FILEXT ".jfk" //file extension which does not already exist
 #define BAD "b"
 #define GOOD "g"

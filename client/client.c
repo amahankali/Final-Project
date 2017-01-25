@@ -15,7 +15,16 @@
 void error_check( int i, char *s ) {
   if ( i < 0 ) {
     printf("%d\n", i);
-    printf("[%s] error %d: %s\n", s, errno, strerror(errno) );
+    printf("[%s] client error %d: %s\n", s, errno, strerror(errno) );
+    exit(1);
+  }
+}
+
+//error checking for fgets
+void error_checkF(int i, char *s ) {
+  if(i <= 0) {
+    printf("%d\n", i);
+    printf("[%s] client error %d: %s\n", s, errno, strerror(errno) );
     exit(1);
   }
 }
@@ -67,7 +76,7 @@ int main () {
 
   printf("Running gitProject\n If you wish to sign up please hit enter without typing.\n");
   printf("Otherwise, enter your username and password on one line, separated by a space.\n");
-  fgets(initialBuffer, sizeof(initialBuffer), stdin);
+  int v = fgets(initialBuffer, sizeof(initialBuffer), stdin); error_checkF(v, "Reading first communication");
   char* nLine = strchr(initialBuffer, '\n'); if(nLine) *nLine = '\0'; //remove new line in initialBuffer
 
   //////////////////Logging in - registers user if needed//////////////////
@@ -78,32 +87,32 @@ int main () {
 
     //first reading of username and password
     printf("Input Username\n");
-    fgets(userName, sizeof(userName), stdin);
+    v = fgets(userName, sizeof(userName), stdin); error_checkF(v, "line 90");
     nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
     printf("Input Password\n");
-    fgets(passWord, sizeof(passWord), stdin);
+    v = fgets(passWord, sizeof(passWord), stdin); error_checkF(v, "line 93");
     nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
     /////////////
 
-    write(sd, "r", 1);
-    write(sd, userName, sizeof(userName));
-    write(sd, passWord, sizeof(passWord));
+    v = write(sd, "r", 1); error_check(v, "sending type");
+    v = write(sd, userName, sizeof(userName)); error_check(v, "sending username");
+    v = write(sd, passWord, sizeof(passWord)); error_check(v, "sending password");
 
     char resp;
-    read(sd, &resp, 1);
+    v = read(sd, &resp, 1); error_check(v, "Seeing if signup was valid");
     while(strcmp(&resp, BAD) == 0)
     {
       printf("There was a problem with your attempted registration.\n");
       printf("Input Username\n");
-      fgets(userName, sizeof(userName), stdin);
+      v = fgets(userName, sizeof(userName), stdin); error_checkF(v, "line 107");
       nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
       printf("Input Password\n");
-      fgets(passWord, sizeof(passWord), stdin);
+      fgets(passWord, sizeof(passWord), stdin); error_checkF(v, "line 110");
       nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
 
-      write(sd, userName, sizeof(userName));
-      write(sd, passWord, sizeof(passWord));
-      read(sd, &resp, 1);
+      v = write(sd, userName, sizeof(userName)); error_check(v, "line 113");
+      v = write(sd, passWord, sizeof(passWord)); error_check(v, "line 114");
+      v = read(sd, &resp, 1); error_check(v, "line 115");
     }
 
     printf("You are now signed up.\n");
@@ -119,11 +128,11 @@ int main () {
     strcpy(passWord, strtok(initialBuffer, " "));
     nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
 
-    write(sd, userName, sizeof(userName));
-    write(sd, passWord, sizeof(passWord));
+    v = write(sd, userName, sizeof(userName)); error_check(v, "line 131");
+    v = write(sd, passWord, sizeof(passWord)); error_check(v, "line 132");
 
     char resp;
-    read(sd, &resp, 1);
+    v = read(sd, &resp, 1); error_check(v, "line 135");
     while(strcmp(&resp, BAD) == 0)
     {
       bzero(userName, MAXMESSAGE);
@@ -131,15 +140,15 @@ int main () {
 
       printf("There was a problem with your attempted login.\n");
       printf("Input Username\n");
-      fgets(userName, sizeof(userName), stdin);
+      v = fgets(userName, sizeof(userName), stdin); error_checkF(v, "line 143");
       nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
       printf("Input Password\n");
-      fgets(passWord, sizeof(passWord), stdin);
+      v = fgets(passWord, sizeof(passWord), stdin); error_checkF(v, "line 146");
       nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
 
-      write(sd, userName, sizeof(userName));
-      write(sd, passWord, sizeof(passWord));
-      read(sd, &resp, 1);
+      v = write(sd, userName, sizeof(userName)); error_check(v, "line 149");
+      v = write(sd, passWord, sizeof(passWord)); error_check(v, "line 150");
+      v = read(sd, &resp, 1); error_check(v, "line 151");
     }
 
     printf("You are now logged in.\n");
@@ -157,12 +166,12 @@ int main () {
 
     char fileName[MAXMESSAGE];
     if(strcmp(request, "$gitProject -lgo") == 0){
-      write(sd, request, sizeof(request));
+      v = write(sd, request, sizeof(request)); error_check(v, "line 169");
       printf("Logged Out\n");
       exit(0);
     }
     else if(strcmp(command, "$gitProject -crf") == 0){
-      write(sd, request, sizeof(request));
+      v = write(sd, request, sizeof(request)); error_check(v, "line 174");
       char resp;
       read(sd, &resp, 1);
       if(strcmp(&resp, GOOD) == 0) printf("File created!\n");
@@ -172,16 +181,16 @@ int main () {
       char text[MAXFILESIZE]; bzero(text, MAXFILESIZE);
       char returnText[MAXFILESIZE]; bzero(returnText, MAXFILESIZE);
 
-      write(sd, request, MAXMESSAGE);
+      v = write(sd, request, MAXMESSAGE); error_check(v, "line 184");
       char resp;
-      read(sd, &resp, 1);
+      v = read(sd, &resp, 1); error_check(v, "line 186");
 
       char* fileName = request + COMMANDSIZE + 1;
       if(strcmp(&resp, BAD) == 0){
         printf("You cannot access %s. Either someone is editing it, or it is not shared with you. \n", fileName);
         continue;
       }
-      read(sd, text, MAXFILESIZE);
+      v = read(sd, text, MAXFILESIZE); error_check(v, "line 193");
 
       touch(fileName);
       writeFile(text, fileName);
@@ -195,36 +204,36 @@ int main () {
       pid_t cpid;
       cpid = fork();
       if (cpid == 0){
-        execvp(cmd, argv);
+        v = execvp(cmd, argv); error_check(v, "line 207");
         return 0;
       }
 
       int status;
-      wait(&status);
+      v = wait(&status); error_check(v, "line 212");
       if(WIFEXITED(status)) {
         copyfile(fileName, returnText);
-        write(sd, "$gitProject -rec", sizeof("$gitProject -rec"));
-        write(sd, " ", 1);
-        write(sd, fileName, sizeof(fileName));
-        write(sd, returnText, sizeof(returnText));
+        v = write(sd, "$gitProject -rec", sizeof("$gitProject -rec")); error_check(v, "line 215");
+        v = write(sd, " ", 1); error_check(v, "line 216");
+        v = write(sd, fileName, sizeof(fileName)); error_check(v, "line 217");
+        v = write(sd, returnText, sizeof(returnText)); error_check(v, "line 218");
         remove(fileName);
       }
       else{
-        write(sd, "$gitProject -non", sizeof("$gitProject"));
+        v = write(sd, "$gitProject -non", sizeof("$gitProject")); error_check(v, "line 222");
         remove(fileName);
       }
     }
     else if (strcmp(command, "$gitProject -rmf") == 0){
-      write(sd, request, sizeof(request));
+      v = write(sd, request, sizeof(request)); error_check(v, "line 227");
       char resp;
-      read(sd, &resp, 1);
+      v = read(sd, &resp, 1); error_check(v, "line 229");
       if(strcmp(&resp, GOOD) == 0) printf("File removed!\n");
       else printf("File not removed.\n");
     }
     else if(strcmp (command, "$gitProject -inv") == 0){
-      write(sd, request, sizeof(request));
+      v = write(sd, request, sizeof(request)); error_check(v, "line 234");
       char resp;
-      read(sd, &resp, 1);
+      v = read(sd, &resp, 1); error_check(v, "line 236");
       if(strcmp(&resp, GOOD) == 0) printf("Collaborator invited!\n");
       else printf("Collaborator not invited.\n");
     }
