@@ -73,21 +73,21 @@ int main () {
   //////////////////Logging in - registers user if needed//////////////////
   if (initialBuffer[0] == '\0')
   {
-    char newUserName[MAXMESSAGE]; bzero(newUserName, MAXMESSAGE);
-    char newPassWord[MAXMESSAGE]; bzero(newPassWord, MAXMESSAGE);
+    char userName[MAXMESSAGE]; bzero(userName, MAXMESSAGE);
+    char passWord[MAXMESSAGE]; bzero(passWord, MAXMESSAGE);
 
     //first reading of username and password
     printf("Input Username\n");
-    fgets(newUserName, sizeof(newUserName), stdin);
-    nLine = strchr(newUserName, '\n'); if(nLine) *nLine = '\0';
+    fgets(userName, sizeof(userName), stdin);
+    nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
     printf("Input Password\n", );
-    fgets(newPassWord, sizeof(newPassWord), stdin);
-    nLine = strchr(newPassWord, '\n'); if(nLine) *nLine = '\0';
+    fgets(passWord, sizeof(passWord), stdin);
+    nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
     /////////////
 
     write(sd, "r", 1);
-    write(sd, newUserName, sizeof(newUserName));
-    write(sd, newPassWord, sizeof(newPassWord));
+    write(sd, userName, sizeof(userName));
+    write(sd, passWord, sizeof(passWord));
 
     char resp;
     read(sd, &resp, 1);
@@ -95,14 +95,14 @@ int main () {
     {
       printf("There was a problem with your attempted registration.\n");
       printf("Input Username\n");
-      fgets(newUserName, sizeof(newUserName), stdin);
-      nLine = strchr(newUserName, '\n'); if(nLine) *nLine = '\0';
+      fgets(userName, sizeof(userName), stdin);
+      nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
       printf("Input Password\n", );
-      fgets(newPassWord, sizeof(newPassWord), stdin);
-      nLine = strchr(newPassWord, '\n'); if(nLine) *nLine = '\0';
+      fgets(passWord, sizeof(passWord), stdin);
+      nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
 
-      write(sd, newUserName, sizeof(newUserName));
-      write(sd, newPassWord, sizeof(newPassWord));
+      write(sd, userName, sizeof(userName));
+      write(sd, passWord, sizeof(passWord));
       read(sd, &resp, 1);
     }
 
@@ -127,16 +127,19 @@ int main () {
     read(sd, &resp, 1);
     while(strcmp(&resp, BAD) == 0)
     {
+      bzero(userName, MAXMESSAGE);
+      bzero(passWord, MAXMESSAGE);
+
       printf("There was a problem with your attempted login.\n");
       printf("Input Username\n");
-      fgets(newUserName, sizeof(newUserName), stdin);
-      nLine = strchr(newUserName, '\n'); if(nLine) *nLine = '\0';
+      fgets(userName, sizeof(userName), stdin);
+      nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
       printf("Input Password\n", );
-      fgets(newPassWord, sizeof(newPassWord), stdin);
-      nLine = strchr(newPassWord, '\n'); if(nLine) *nLine = '\0';
+      fgets(passWord, sizeof(passWord), stdin);
+      nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
 
-      write(sd, newUserName, sizeof(newUserName));
-      write(sd, newPassWord, sizeof(newPassWord));
+      write(sd, userName, sizeof(userName));
+      write(sd, passWord, sizeof(passWord));
       read(sd, &resp, 1);
     }
 
