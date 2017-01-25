@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 void error_check( int i, char *s ) {
   if ( i < 0 ) {
@@ -43,11 +44,12 @@ int signUp(char* username, char* password) {
   char newLine[] = "\n";
   int f = open("users.txt", O_APPEND | O_RDWR, 0666);
   printf("\nRegistering User...\n\n");
+  int v;
   if(checkUsername(username) && checkUsername(password)){
     v = write(f, username, sizeof(username)); error_check(v, "writing username");
     v = write(f, x, sizeof(x)); error_check(v, "writing colon");
-    write(f, cypher(password), sizeof(password)); error_check(v, "writing encrypted password");
-    write(f, newLine, sizeof(newLine)); error_check(v, "writing newline");
+    v = write(f, cypher(password), sizeof(password)); error_check(v, "writing encrypted password");
+    v = write(f, newLine, sizeof(newLine)); error_check(v, "writing newline");
     return 1;
   }
   return 0;

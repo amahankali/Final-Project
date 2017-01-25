@@ -21,9 +21,9 @@ void error_check( int i, char *s ) {
 }
 
 //error checking for fgets
-void error_checkF(int i, char *s ) {
+void error_checkF(char* i, char *s ) {
   if(i <= 0) {
-    printf("%d\n", i);
+    printf("%lu\n", (unsigned long) i);
     printf("[%s] client error %d: %s\n", s, errno, strerror(errno) );
     exit(1);
   }
@@ -76,7 +76,8 @@ int main () {
 
   printf("Running gitProject\n If you wish to sign up please hit enter without typing.\n");
   printf("Otherwise, enter your username and password on one line, separated by a space.\n");
-  char* v = fgets(initialBuffer, sizeof(initialBuffer), stdin); error_checkF(v, "Reading first communication");
+  int v;
+  char* v2 = fgets(initialBuffer, sizeof(initialBuffer), stdin); error_checkF(v2, "Reading first communication");
   char* nLine = strchr(initialBuffer, '\n'); if(nLine) *nLine = '\0'; //remove new line in initialBuffer
 
   //////////////////Logging in - registers user if needed//////////////////
@@ -87,10 +88,10 @@ int main () {
 
     //first reading of username and password
     printf("Input Username\n");
-    v = fgets(userName, sizeof(userName), stdin); error_checkF(v, "line 90");
+    v2 = fgets(userName, sizeof(userName), stdin); error_checkF(v2, "line 90");
     nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
     printf("Input Password\n");
-    v = fgets(passWord, sizeof(passWord), stdin); error_checkF(v, "line 93");
+    v2 = fgets(passWord, sizeof(passWord), stdin); error_checkF(v2, "line 93");
     nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
     /////////////
 
@@ -104,10 +105,10 @@ int main () {
     {
       printf("There was a problem with your attempted registration.\n");
       printf("Input Username\n");
-      v = fgets(userName, sizeof(userName), stdin); error_checkF(v, "line 107");
+      v2 = fgets(userName, sizeof(userName), stdin); error_checkF(v2, "line 107");
       nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
       printf("Input Password\n");
-      fgets(passWord, sizeof(passWord), stdin); error_checkF(v, "line 110");
+      v2 = fgets(passWord, sizeof(passWord), stdin); error_checkF(v2, "line 110");
       nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
 
       v = write(sd, userName, sizeof(userName)); error_check(v, "line 113");
@@ -140,10 +141,10 @@ int main () {
 
       printf("There was a problem with your attempted login.\n");
       printf("Input Username\n");
-      v = fgets(userName, sizeof(userName), stdin); error_checkF(v, "line 143");
+      v2 = fgets(userName, sizeof(userName), stdin); error_checkF(v2, "line 143");
       nLine = strchr(userName, '\n'); if(nLine) *nLine = '\0';
       printf("Input Password\n");
-      v = fgets(passWord, sizeof(passWord), stdin); error_checkF(v, "line 146");
+      v2 = fgets(passWord, sizeof(passWord), stdin); error_checkF(v2, "line 146");
       nLine = strchr(passWord, '\n'); if(nLine) *nLine = '\0';
 
       v = write(sd, userName, sizeof(userName)); error_check(v, "line 149");
