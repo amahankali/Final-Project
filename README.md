@@ -11,12 +11,9 @@
 - filesystem.txt
 - **client**
   - a.out
-  - auxClientFunc.h
   - client.c
-  - client.h
   - constant.h
   - constant.h.gch
-  - test.txt
 - **server**
   - a.out
   - auxServerFunc.c
@@ -24,9 +21,8 @@
   - constant.h
   - constant.h.gch
   - server.c
-  - server.h
   - users.txt
-- **our_terminal_work_
+- **our_terminal_work_**
   - create.c
   - delete.c
   - logInOut.c
