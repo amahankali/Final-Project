@@ -204,13 +204,13 @@ int main () {
       if(WIFEXITED(status)) {
         copyfile(fileName, returnText);
         write(sd, "$gitProject -rec", sizeof("$gitProject -rec"));
-        write(sd, “ “, 1);
+        write(sd, " ", 1);
         write(sd, fileName, sizeof(fileName));
         write(sd, returnText, sizeof(returnText));
         remove(fileName);
       }
       else{
-        write(sd, "$gitProject -non”, sizeof("$gitProject”);
+        write(sd, "$gitProject -non", sizeof("$gitProject"));
         remove(fileName);
       }
     }
