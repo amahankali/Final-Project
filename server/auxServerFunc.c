@@ -49,10 +49,10 @@ int signUp(char* username, char* password) {
   int v;
   if(checkUsername(username) && checkUsername(password)){
     printf("Server - Writing username\n");
-    v = write(f, username, sizeof(username)); error_check(v, "writing username"); printf("wrote username\n");
-    v = write(f, x, sizeof(x)); error_check(v, "writing colon"); printf("wrote colon\n");
-    v = write(f, cypher(password), sizeof(password)); error_check(v, "writing encrypted password"); printf("wrote encrypted pass\n");
-    v = write(f, newLine, sizeof(newLine)); error_check(v, "writing newline"); printf("wrote newline\n");
+    v = write(f, username, strlen(username)); error_check(v, "writing username"); printf("wrote username\n");
+    v = write(f, x, strlen(x)); error_check(v, "writing colon"); printf("wrote colon\n");
+    v = write(f, cypher(password), strlen(password)); error_check(v, "writing encrypted password"); printf("wrote encrypted pass\n");
+    v = write(f, newLine, strlen(newLine)); error_check(v, "writing newline"); printf("wrote newline\n");
     printf("Server - Signed up user\n");
     return 1;
   }
@@ -74,7 +74,7 @@ int login(char* username, char* password) {
   int f = open("users.txt",  O_RDONLY, 0666);
   printf("\nLogging In User...\n\n");
   if(checkUsername(username) && checkUsername(password)){
-    read(f, a, sizeof(a));
+    read(f, a, 10000);
     while(*a){
       char* k = strsep(&a, "\n");
       if(strcmp(strsep(&k, ":"), username) == 0){
