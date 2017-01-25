@@ -161,15 +161,16 @@ int validateUser(char* filename, char* username){
     char* buffer = (char *) calloc(1, MAXMESSAGE);
     char* permfile = permFile(filename);
     copyfile(permfile, buffer);
-    printf("Contents of permfile: %s\n", buffer);
-    int i = 0;
-    for(; i < strlen(buffer); i++) printf("buffer[%d] = %c\n", i, buffer[i]);
+    //printf("Contents of permfile: %s\n", buffer);
+    //int i = 0;
+    //for(; i < strlen(buffer); i++) printf("buffer[%d] = %c\n", i, buffer[i]);
     char* name;
     char* oBuffer = buffer;
     while((name = strsep(&buffer,"\n")) != NULL){
       printf("current username being viewed in permfile: %s\n", name);
       if (strcmp(name, username) == 0)
       {
+        printf("checked name %s\n", name);
         free(oBuffer);
         return 1;
       }
@@ -447,7 +448,7 @@ int main() {
             printf("Length of other username: %lu\n", strlen(otheruser));
             //permFD = open(permfile, O_APPEND, 0666);
             int charcount = 0;
-            v = write(permFD, otheruser, strlen(username)); error_check(v, "Adding user to permissions file"); charcount += v;
+            v = write(permFD, otheruser, strlen(otheruser)); error_check(v, "Adding user to permissions file"); charcount += v;
             printf("Characters written in username: %d\n", v);
             v = write(permFD, "\n", 1); error_check(v, "Writing newline to permissions file"); charcount += v;
             printf("Characters written in newline: %d\n", v);
