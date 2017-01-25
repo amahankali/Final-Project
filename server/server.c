@@ -305,7 +305,12 @@ int main() {
             char* filename = request + COMMANDSIZE + 1;
 
             //check if he is allowed
-            validateUser(filename, username); printf("Validated user\n");
+            int allowed = validateUser(filename, username); printf("Validated user\n");
+            if(!allowed)
+            {
+              aWrite(newsockfd, BAD);
+              continue;
+            }
 
             //check semaphore
             int key = ftok(filename, 12); error_check(key, "Getting key to edit file"); printf("Got key\n");
@@ -434,7 +439,7 @@ int main() {
               continue;
             }
             free(owner);
-            ///////////////////////////////////////////////////////////////////////            
+            ///////////////////////////////////////////////////////////////////////
 
             //add the other user to the permfile of this file
             char* otheruser = nextSpace + 1;
