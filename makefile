@@ -2,8 +2,8 @@ compile: server/server.c server/constant.h server/auxServerFunc.c client/client.
 	gcc server/server.c server/constant.h server/auxServerFunc.c
 	gcc client/client.c client/constant.h
 
-server:
+run server:
 	./server/a.out
 	
-client:
+run client:
 	./client/a.out
