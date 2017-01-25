@@ -129,6 +129,8 @@ int main() {
 
       v = read(newsockfd, username, MAXMESSAGE); error_check(v, "Reading username");
       v = read(newsockfd, password, MAXMESSAGE); error_check(v, "Reading password");
+      printf("Given username: %s\n", username);
+      printf("Given password: %s\n", password);
 
       int c;
       if(type == 'r') c = signUp(username, password);

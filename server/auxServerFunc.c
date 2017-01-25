@@ -19,8 +19,9 @@ void error_check( int i, char *s ) {
 char* cypher(char* x){
   int i = 0;
   char *ans = calloc(strlen(x),1);
-  while(*(x+i)){
+  while(*(x+i) && i < strlen(x)){
     ans[i] = (*(x+i) * 3) % 128;
+    i++;
   }
   return ans;
 }
@@ -46,10 +47,12 @@ int signUp(char* username, char* password) {
   printf("\nRegistering User...\n\n");
   int v;
   if(checkUsername(username) && checkUsername(password)){
-    v = write(f, username, sizeof(username)); error_check(v, "writing username");
-    v = write(f, x, sizeof(x)); error_check(v, "writing colon");
-    v = write(f, cypher(password), sizeof(password)); error_check(v, "writing encrypted password");
-    v = write(f, newLine, sizeof(newLine)); error_check(v, "writing newline");
+    printf("Server - Writing username\n");
+    v = write(f, username, sizeof(username)); error_check(v, "writing username"); printf("wrote username\n");
+    v = write(f, x, sizeof(x)); error_check(v, "writing colon"); printf("wrote colon\n");
+    v = write(f, cypher(password), sizeof(password)); error_check(v, "writing encrypted password"); printf("wrote encrypted pass\n");
+    v = write(f, newLine, sizeof(newLine)); error_check(v, "writing newline"); printf("wrote newline\n");
+    printf("Server - Signed up user\n");
     return 1;
   }
   return 0;
